@@ -79,7 +79,7 @@ select{background:var(--card-bg);color:var(--text);min-width:200px;background-im
 /* ── MATCHING ── */
 .match-hdr{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 .m-timer{font-size:1.4rem;font-weight:bold;color:var(--gold);min-width:48px}
-.match-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.match-grid{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:min-content;gap:8px}
 .mc{background:var(--card-bg);border:2px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;min-height:70px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;user-select:none;-webkit-tap-highlight-color:transparent;transition:border-color .15s,background .15s}
 .mc:hover{border-color:var(--mid);background:#1f3048}
 .mc.selected{border-color:var(--gold);background:#2a3518;box-shadow:0 0 10px rgba(200,168,75,.4)}
@@ -97,7 +97,7 @@ select{background:var(--card-bg);color:var(--text);min-width:200px;background-im
 
 @media(max-width:480px){
   .fc-word{font-size:2.4rem}.kj-word{font-size:3.8rem}
-  .match-grid{grid-template-columns:repeat(2,1fr)}
+  
   .controls{flex-direction:column;align-items:stretch}
   select{min-width:unset;width:100%}
 }
@@ -218,6 +218,8 @@ select{background:var(--card-bg);color:var(--text);min-width:200px;background-im
       <option value="vol1">&#9135;&#9135; Vol I only</option>
       <option value="vol2">&#9135;&#9135; Vol II only</option>
       <option value="vol3">&#9135;&#9135; Vol III only</option>
+      <option value="vol12">&#9135;&#9135; Vol I + II</option>
+      <option value="vol123">&#9135;&#9135; Vol I + II + III</option>
       <option value="Vol I — Daily Routine & Time">Vol I — Daily Routine & Time</option>
       <option value="Vol I — Family & People">Vol I — Family & People</option>
       <option value="Vol I — Food & Eating">Vol I — Food & Eating</option>
@@ -251,6 +253,10 @@ select{background:var(--card-bg);color:var(--text);min-width:200px;background-im
     <select id="m-type">
       <option value="jpEn">Japanese &#8596; English</option>
       <option value="kanaJp">Kana &#8596; Kanji</option>
+    </select>
+    <select id="m-layout">
+      <option value="shuffle">&#128256; Shuffled (mixed)</option>
+      <option value="split">&#9707; Left = Japanese, Right = English</option>
     </select>
     <button class="btn btn-gold" onclick="startMatch()">&#9654; New Game</button>
   </div>
@@ -441,6 +447,7 @@ function startMatch(){
   if(M.timer)clearInterval(M.timer);
   M.matched=0;M.total=pool.length;M.sel=null;M.selEl=null;M.locked=false;
 
+  var layout=document.getElementById('m-layout').value;
   var pairs=[];
   pool.forEach(function(v,i){
     var mainText,mainSub,ansText,ansSub;
@@ -451,16 +458,29 @@ function startMatch(){
       mainText=v.w;   mainSub=v.kana;
       ansText=v.en;   ansSub='';
     }
-    pairs.push({id:i,      pair:i,side:'L',main:mainText,sub:mainSub});
-    pairs.push({id:i+size, pair:i,side:'R',main:ansText, sub:ansSub});
+    pairs.push({id:i,      pair:i,side:'L',main:mainText,sub:mainSub,col:'L'});
+    pairs.push({id:i+size, pair:i,side:'R',main:ansText, sub:ansSub,col:'R'});
   });
-  M.cards=shuffle(pairs);
+  // Layout: shuffled = one big random grid, split = left col JP right col EN
+  if(layout==='split'){
+    var leftCards  = shuffle(pairs.filter(function(c){return c.col==='L';}));
+    var rightCards = shuffle(pairs.filter(function(c){return c.col==='R';}));
+    // Interleave: left[0], right[0], left[1], right[1]...
+    M.cards=[];
+    for(var ii=0;ii<leftCards.length;ii++){M.cards.push(leftCards[ii]);M.cards.push(rightCards[ii]);}
+  }else{
+    M.cards=shuffle(pairs);
+  }
 
   var key=lesson+'_'+size+'_'+type;
   var bestHTML=M.best[key]?'<span style="color:var(--gold);font-size:.8rem">Best: '+fmtTime(M.best[key])+'</span>':'';
   var area=document.getElementById('match-area');
+  var colHeaders=layout==='split'
+    ? '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px"><div style="text-align:center;color:var(--gold);font-size:.8rem;font-weight:bold;padding:4px">'+(type==='kanaJp'?'Kana':'Japanese')+'</div><div style="text-align:center;color:var(--gold);font-size:.8rem;font-weight:bold;padding:4px">'+(type==='kanaJp'?'Kanji':'English')+'</div></div>'
+    : '';
   area.innerHTML=
     '<div class="match-hdr"><div class="m-timer" id="m-clk">0s</div><div id="m-score" style="color:var(--muted);font-size:.9rem">0 / '+M.total+' matched</div>'+bestHTML+'</div>'+
+    colHeaders+
     '<div class="match-grid" id="m-grid">'+
       M.cards.map(function(c){
         return '<div class="mc" data-id="'+c.id+'" data-pair="'+c.pair+'" data-side="'+c.side+'">'+
