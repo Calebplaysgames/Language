@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japanese Study Library</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#0a1420;color:#e8edf2;min-height:100vh;display:flex;flex-direction:column}
+.back-bar{background:#0d1520;padding:8px 20px;border-bottom:1px solid #111d2b;font-size:.82rem}
+.back-bar a{color:#556677;text-decoration:none}
+.back-bar a:hover{color:#8899aa}
+.header{text-align:center;padding:48px 24px 32px;background:linear-gradient(180deg,#060e18,#0a1420)}
+.header-tag{font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:#556677;margin-bottom:12px}
+.header h1{font-size:2.2rem;font-weight:bold;color:#fff;margin-bottom:10px}
+.header h1 span{color:#c8a84b}
+.header p{color:#8899aa;font-size:.95rem;max-width:480px;margin:0 auto}
+.divider{width:50px;height:2px;background:linear-gradient(90deg,transparent,#c8a84b,transparent);margin:28px auto}
+.levels{flex:1;display:flex;flex-direction:column;gap:10px;max-width:680px;width:100%;margin:0 auto;padding:0 20px 48px}
+.level-card{display:flex;align-items:center;gap:18px;background:#111d2b;border:1px solid #1e3040;border-radius:14px;padding:20px 24px;text-decoration:none;color:inherit;transition:all .2s;position:relative;overflow:hidden}
+.level-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+.level-card:hover{border-color:#2a4060;background:#152030;transform:translateX(4px)}
+.level-card .badge{font-size:1.1rem;font-weight:bold;min-width:52px;text-align:center;padding:6px 10px;border-radius:8px}
+.level-card .info{flex:1}
+.level-card .title{font-size:1.05rem;font-weight:bold;color:#fff;margin-bottom:3px}
+.level-card .sub{font-size:.8rem;color:#667788}
+.level-card .count{font-size:.8rem;color:#445566;white-space:nowrap}
+.level-card .arr{color:#445566;font-size:1.1rem;transition:color .2s,transform .2s}
+.level-card:hover .arr{color:#c8a84b;transform:translateX(3px)}
+.flashcard-btn{display:block;background:rgba(200,168,75,.08);border:1px solid rgba(200,168,75,.2);border-radius:12px;padding:14px 24px;text-align:center;text-decoration:none;color:#c8a84b;font-weight:bold;font-size:.95rem;margin:4px 0 12px;transition:all .2s}
+.flashcard-btn:hover{background:rgba(200,168,75,.15)}
+.footer{background:#060e18;border-top:1px solid #111d2b;padding:20px 24px;text-align:center}
+.footer p{color:#445566;font-size:.73rem;line-height:1.7;max-width:660px;margin:0 auto}
+.footer strong{color:#556677}
+</style>
+</head>
+<body>
+
+<div class="back-bar"><a href="index.html">&#8592; Language Study Library</a></div>
+
+<div class="header">
+  <div class="header-tag">Complete Proficiency Study Library</div>
+  <h1>日本語 <span>Library</span></h1>
+  <p>Select a proficiency level to view all workbooks, reference guides, and study materials.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="levels">
+
+  <a class="flashcard-btn" href="JP_N5_Flashcards.html">🃏 N5 Flashcards &amp; Matching Game</a>
+
+  <a class="level-card" href="jp_beginner.html" style="--c:#c8a84b">
+    <div class="badge" style="background:rgba(200,168,75,.15);color:#c8a84b;border:1px solid rgba(200,168,75,.3);">★</div>
+    <div class="info">
+      <div class="title">Beginner</div>
+      <div class="sub">Start here — Hiragana, Katakana, your first steps in Japanese</div>
+    </div>
+    <div class="count">1 guide</div>
+    <div class="arr">→</div>
+  </a>
+
+  <a class="level-card" href="jp_n5.html">
+    <div class="badge" style="background:rgba(46,117,182,.15);color:#4a9fd4;border:1px solid rgba(46,117,182,.3);">N5</div>
+    <div class="info">
+      <div class="title">N5 Proficiency</div>
+      <div class="sub">~100 kanji · Basic grammar · Everyday vocabulary</div>
+    </div>
+    <div class="count">14 files</div>
+    <div class="arr">→</div>
+  </a>
+
+  <a class="level-card" href="jp_n4.html">
+    <div class="badge" style="background:rgba(26,122,74,.15);color:#3dba7a;border:1px solid rgba(26,122,74,.3);">N4</div>
+    <div class="info">
+      <div class="title">N4 Proficiency</div>
+      <div class="sub">~300 kanji · Intermediate grammar · Expanded vocabulary</div>
+    </div>
+    <div class="count">9 files</div>
+    <div class="arr">→</div>
+  </a>
+
+  <a class="level-card" href="jp_n3.html">
+    <div class="badge" style="background:rgba(122,58,138,.15);color:#b06ac8;border:1px solid rgba(122,58,138,.3);">N3</div>
+    <div class="info">
+      <div class="title">N3 Proficiency</div>
+      <div class="sub">~650 kanji · Complex grammar · Natural conversation</div>
+    </div>
+    <div class="count">7 files</div>
+    <div class="arr">→</div>
+  </a>
+
+  <a class="level-card" href="jp_n2.html">
+    <div class="badge" style="background:rgba(168,74,26,.15);color:#d4743a;border:1px solid rgba(168,74,26,.3);">N2</div>
+    <div class="info">
+      <div class="title">N2 Proficiency</div>
+      <div class="sub">~1,000 kanji · Advanced grammar · Near-fluent reading</div>
+    </div>
+    <div class="count">4 files</div>
+    <div class="arr">→</div>
+  </a>
+
+  <a class="level-card" href="jp_n1.html">
+    <div class="badge" style="background:rgba(138,26,26,.15);color:#cc4444;border:1px solid rgba(138,26,26,.3);">N1</div>
+    <div class="info">
+      <div class="title">N1 Proficiency</div>
+      <div class="sub">~2,000 kanji · Master-level grammar · Full literacy</div>
+    </div>
+    <div class="count">1 guide</div>
+    <div class="arr">→</div>
+  </a>
+
+</div>
+
+<div class="footer">
+  <p>
+    <strong>JLPT</strong> (Japanese Language Proficiency Test) is operated by the <strong>Japan Foundation</strong> and <strong>JEES</strong> (Japan Educational Exchanges and Services).
+    This website is not owned or operated by either organisation and cannot guarantee a perfect test score or 100% accurate material. Material is accurate as of January 2026.
+  </p>
+</div>
+
+</body>
+</html>
