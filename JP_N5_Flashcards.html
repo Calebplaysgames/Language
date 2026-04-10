@@ -599,6 +599,21 @@ function speakEn(text) {
 
 function speak(text) { speakJp(text); }
 
+function toggleVoice() {
+  voiceEnabled = !voiceEnabled;
+  ['v-voice-btn','k-voice-btn'].forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (!btn) return;
+    if (voiceEnabled) {
+      btn.innerHTML = '&#128266; Voice: On';
+      btn.classList.add('voice-on');
+    } else {
+      btn.innerHTML = '&#128266; Voice: Off';
+      btn.classList.remove('voice-on');
+    }
+  });
+}
+
 // Speak the front-face content when a card flips
 // Called after renderVocab() and renderKanji() complete
 function speakCurrentVocab() {
@@ -647,6 +662,21 @@ function speakFlippedKanji() {
   }
 }
 
+
+function toggleVoice() {
+  voiceEnabled = !voiceEnabled;
+  ['v-voice-btn','k-voice-btn'].forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (!btn) return;
+    if (voiceEnabled) {
+      btn.innerHTML = '&#128266; Voice: On';
+      btn.classList.add('voice-on');
+    } else {
+      btn.innerHTML = '&#128266; Voice: Off';
+      btn.classList.remove('voice-on');
+    }
+  });
+}
 </script>
 </body>
 </html>
