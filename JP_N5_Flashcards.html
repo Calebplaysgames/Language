@@ -94,6 +94,7 @@ select{background:var(--card-bg);color:var(--text);min-width:200px;background-im
 .big-time{font-size:3rem;font-weight:bold;color:#fff;margin:12px 0}
 
 .empty{text-align:center;color:var(--muted);padding:48px 20px;font-size:.95rem}
+.btn-outline.voice-on{background:rgba(200,168,75,.15);color:var(--gold);border-color:rgba(200,168,75,.4)}
 
 @media(max-width:480px){
   .fc-word{font-size:2.4rem}.kj-word{font-size:3.8rem}
@@ -157,6 +158,7 @@ select{background:var(--card-bg);color:var(--text);min-width:200px;background-im
     </select>
     <button class="btn btn-gold" onclick="initVocab()">&#9654; Start</button>
     <button class="btn btn-outline" onclick="shuffleVocab()">&#128256; Shuffle</button>
+    <button class="btn btn-outline" id="v-voice-btn" onclick="toggleVoice()" title="Toggle pronunciation">&#128266; Voice: Off</button>
     <span class="count-badge" id="v-count">901 cards</span>
   </div>
   <div style="padding:16px"><div class="fc-area" id="vocab-area"><div class="empty">Press Start to begin</div></div></div>
@@ -204,6 +206,7 @@ select{background:var(--card-bg);color:var(--text);min-width:200px;background-im
     <button class="btn btn-gold" onclick="initKanji()">&#9654; Start</button>
     <button class="btn btn-outline" onclick="shuffleKanji()">&#128256; Shuffle</button>
     <span class="count-badge" id="k-count">143 cards</span>
+    <button class="btn btn-outline" id="k-voice-btn" onclick="toggleVoice()" title="Toggle pronunciation">&#128266; Voice: Off</button>
   </div>
   <div style="padding:16px"><div class="fc-area" id="kanji-area"><div class="empty">Press Start to begin</div></div></div>
 </div>
@@ -324,6 +327,7 @@ function renderVocab(){
     back='<div class="fc-word">'+esc(c.w)+'</div>'+kanaLine+'<div class="fc-meaning">'+esc(c.en)+'</div><div class="fc-lesson">'+esc(c.lesson)+'</div>';
   }
   renderCard(el,'v',pct,V.idx,V.deck.length,V.right,V.wrong,V.flipped,front,back);
+  if(!V.flipped) speakCurrentVocab();
 }
 
 // ────────────────────────────────────────
@@ -353,6 +357,7 @@ function renderKanji(){
     back='<div class="kj-word">'+esc(c.k)+'</div><div class="kj-on">ON: '+esc(c.on)+'</div><div class="kj-kun">kun: '+esc(c.kun)+'</div><div class="kj-stroke">'+c.s+' strokes</div>';
   }
   renderCard(el,'k',pct,K.idx,K.deck.length,K.right,K.wrong,K.flipped,front,back);
+  if(!K.flipped) speakCurrentKanji();
 }
 
 // ────────────────────────────────────────
@@ -384,8 +389,8 @@ function renderCard(el,type,pct,idx,total,right,wrong,flipped,front,back){
   var state    = type==='v' ? V : K;
 
   function wire(id,fn){var e=document.getElementById(id);if(e)e.addEventListener('click',fn);}
-  wire(pid+'fw',  function(){ state.flipped=!state.flipped; renderFn(); });
-  wire(pid+'rev', function(){ state.flipped=true;            renderFn(); });
+  wire(pid+'fw',  function(){ state.flipped=!state.flipped; renderFn(); if(state.flipped){ type==='v'?speakFlippedVocab():speakFlippedKanji(); } });
+  wire(pid+'rev', function(){ state.flipped=true;            renderFn(); type==='v'?speakFlippedVocab():speakFlippedKanji(); });
   wire(pid+'no',  function(){ state.wrong++; state.missed.push(state.deck[state.idx]); state.idx++; state.flipped=false; renderFn(); });
   wire(pid+'yes', function(){ state.right++;                               state.idx++; state.flipped=false; renderFn(); });
   wire(pid+'prev',function(){ if(state.idx>0){state.idx--;state.flipped=false;renderFn();} });
@@ -555,6 +560,93 @@ function selMatch(id,pair,side){
     },600);
   }
 }
+
+// ── VOICE / SPEECH SYNTHESIS ────────────────────────────────
+var voiceEnabled = false;
+var jpVoice = null;
+var enVoice = null;
+
+// Find Japanese voice on load
+function loadVoices() {
+  var voices = window.speechSynthesis.getVoices();
+  jpVoice = voices.find(function(v){ return v.lang === 'ja-JP'; }) ||
+            voices.find(function(v){ return v.lang.startsWith('ja'); }) || null;
+  enVoice = voices.find(function(v){ return v.lang === 'en-US'; }) ||
+            voices.find(function(v){ return v.lang.startsWith('en'); }) || null;
+}
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+  loadVoices();
+}
+
+function speakJp(text) {
+  if (!voiceEnabled || !window.speechSynthesis || !text) return;
+  window.speechSynthesis.cancel();
+  var utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'ja-JP'; utt.rate = 0.85; utt.pitch = 1;
+  if (jpVoice) utt.voice = jpVoice;
+  window.speechSynthesis.speak(utt);
+}
+
+function speakEn(text) {
+  if (!voiceEnabled || !window.speechSynthesis || !text) return;
+  window.speechSynthesis.cancel();
+  var utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'en-US'; utt.rate = 0.9; utt.pitch = 1;
+  if (enVoice) utt.voice = enVoice;
+  window.speechSynthesis.speak(utt);
+}
+
+function speak(text) { speakJp(text); }
+
+// Speak the front-face content when a card flips
+// Called after renderVocab() and renderKanji() complete
+function speakCurrentVocab() {
+  if (!voiceEnabled) return;
+  var c = V.deck[V.idx];
+  if (!c) return;
+  var mode = document.getElementById('v-mode').value;
+  if (mode === 'enJp') {
+    speakEn(c.en);       // Front is English
+  } else {
+    speakJp(c.w);        // Front is Japanese word
+  }
+}
+
+function speakCurrentKanji() {
+  if (!voiceEnabled) return;
+  var c = K.deck[K.idx];
+  if (!c) return;
+  var mode = document.getElementById('k-mode').value;
+  if (mode === 'meaningKj') {
+    speakEn(c.m);        // Front is English meaning
+  } else {
+    var reading = c.kun ? c.kun.split('・')[0] : c.on.split('・')[0];
+    speakJp(reading);    // Front is kanji — speak Japanese reading
+  }
+}
+
+function speakFlippedVocab() {
+  if (!voiceEnabled) return;
+  var c = V.deck[V.idx];
+  if (!c) return;
+  var mode = document.getElementById('v-mode') ? document.getElementById('v-mode').value : 'jpEn';
+  if (mode === 'enJp') speakJp(c.w);   // flipped = now showing Japanese
+  else speakEn(c.en);                   // flipped = now showing English meaning
+}
+function speakFlippedKanji() {
+  if (!voiceEnabled) return;
+  var c = K.deck[K.idx];
+  if (!c) return;
+  var mode = document.getElementById('k-mode') ? document.getElementById('k-mode').value : 'kjMeaning';
+  if (mode === 'meaningKj') {
+    var reading = c.kun ? c.kun.split('・')[0] : c.on.split('・')[0];
+    speakJp(reading);    // flipped = showing kanji, speak the reading
+  } else {
+    speakEn(c.m);        // flipped = showing English meaning
+  }
+}
+
 </script>
 </body>
 </html>
