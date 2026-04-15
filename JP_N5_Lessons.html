@@ -188,14 +188,10 @@ body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text);min-hei
     <h1>N5 <span>Lessons</span></h1>
     <p>Complete each lesson to unlock the next.<br>Score 80%+ on the final quiz to pass.</p>
   </div>
-  <div class="notice">
-    ⚙️ <strong style="color:var(--text)">Requires setup:</strong> Paste your Google Apps Script URL below.
-    <a href="#" onclick="toggleSetup();return false">How to set up →</a>
+  <div class="notice" style="background:rgba(50,200,80,.07);border-color:rgba(50,200,80,.2)">
+    ✅ <strong style="color:var(--text)">Ready to use</strong> — backend is connected. Just create an account or log in below.
   </div>
-  <div class="fg">
-    <label>Apps Script URL</label>
-    <input type="url" id="api-url" placeholder="https://script.google.com/macros/s/..." oninput="saveUrl()">
-  </div>
+  <input type="hidden" id="api-url" value="https://script.google.com/macros/s/AKfycbz-76AT7yHHlJKU6u0UCB_NJRcxhLv8vvxEWXt9eFOd5zifQwDDtdIW1QKjLTCwSN8W/exec">
   <div class="auth-tabs">
     <div class="auth-tab active" id="tab-login-btn" onclick="switchTab('login')">Log In</div>
     <div class="auth-tab" id="tab-reg-btn" onclick="switchTab('register')">Sign Up</div>
@@ -279,7 +275,7 @@ var XP    = {vocab:10,mc:20,fill:20,match:20,listen:20,quiz:50};
 
 // ── STATE ─────────────────────────────────────────────────────
 var user=null, token=null, progress=null;
-var apiUrl = localStorage.getItem('jlpt_api')||'';
+var apiUrl = localStorage.getItem('jlpt_api')||'https://script.google.com/macros/s/AKfycbz-76AT7yHHlJKU6u0UCB_NJRcxhLv8vvxEWXt9eFOd5zifQwDDtdIW1QKjLTCwSN8W/exec';
 var curLesson=null, curAct=null;
 var exQ=[], exIdx=0, exCorrect=0, exHearts=3, exAnswered=false;
 var mSel=null, mSelEl=null, mMatched=0, mLocked=false;
