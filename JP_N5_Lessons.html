@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>N5 Interactive Lessons</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a1420;--card:#111d2b;--border:#1e3040;--gold:#c8a84b;--text:#e8edf2;--muted:#8899aa;--mid:#2E75B6;--green:#1a7a4a;--red:#cc3333}
+body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* NAV */
+#top-nav{background:rgba(10,12,16,.97);border-bottom:1px solid var(--border);padding:0 16px;display:none;align-items:center;gap:10px;height:48px;position:sticky;top:0;z-index:100;flex-wrap:nowrap}
+#top-nav a{color:var(--muted);text-decoration:none;font-size:.82rem;white-space:nowrap}
+#top-nav a:hover{color:var(--text)}
+.user-bar{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.xp-pill{background:rgba(200,168,75,.15);color:var(--gold);border:1px solid rgba(200,168,75,.3);padding:3px 10px;border-radius:20px;font-size:.78rem;font-weight:bold;white-space:nowrap}
+.nav-user{color:var(--muted);font-size:.82rem;white-space:nowrap}
+.btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);padding:4px 9px;border-radius:6px;cursor:pointer;font-size:.78rem;white-space:nowrap}
+.btn-logout:hover{border-color:var(--red);color:var(--red)}
+
+/* SCREENS */
+.screen{display:none}.screen.active{display:block}
+
+/* AUTH */
+.auth-outer{max-width:420px;margin:0 auto;padding:50px 20px}
+.auth-head{text-align:center;margin-bottom:36px}
+.auth-head h1{font-size:1.9rem;color:#fff;margin-bottom:8px}
+.auth-head h1 span{color:var(--gold)}
+.auth-head p{color:var(--muted);font-size:.9rem;line-height:1.5}
+.notice{background:rgba(200,168,75,.07);border:1px solid rgba(200,168,75,.2);border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:.8rem;color:#8899aa;line-height:1.6}
+.notice a{color:var(--gold)}
+.auth-tabs{display:flex;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:20px;overflow:hidden}
+.auth-tab{flex:1;padding:11px;text-align:center;cursor:pointer;font-size:.88rem;color:var(--muted);transition:all .2s}
+.auth-tab.active{background:rgba(200,168,75,.12);color:var(--gold);font-weight:bold}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:5px}
+.fg input{width:100%;background:#0d1a26;border:1px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--text);font-size:.93rem;outline:none;transition:border-color .2s}
+.fg input:focus{border-color:var(--gold)}
+.btn-primary{width:100%;background:var(--gold);color:#111;border:none;border-radius:8px;padding:11px;font-size:.97rem;font-weight:bold;cursor:pointer;transition:background .2s;margin-top:4px}
+.btn-primary:hover{background:#b89630}
+.auth-msg{text-align:center;font-size:.83rem;padding:8px;border-radius:6px;margin-top:10px;display:none}
+.auth-msg.err{background:rgba(200,50,50,.15);color:#ff8080;border:1px solid rgba(200,50,50,.3)}
+.auth-msg.ok{background:rgba(50,200,80,.15);color:#80ff90;border:1px solid rgba(50,200,80,.3)}
+.setup-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-top:18px}
+.setup-box h3{color:var(--gold);margin-bottom:10px;font-size:.95rem}
+.setup-box ol{color:var(--muted);font-size:.82rem;line-height:2;padding-left:16px}
+.setup-box ol strong{color:var(--text)}
+
+/* MAP */
+.map-head{text-align:center;padding:36px 20px 16px;background:linear-gradient(180deg,#060e18,var(--bg))}
+.map-head h2{font-size:1.7rem;color:#fff;margin-bottom:5px}
+.map-head p{color:var(--muted);font-size:.88rem}
+.prog-row{display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.prog-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 18px;text-align:center}
+.prog-box .n{font-size:1.4rem;font-weight:bold;color:var(--gold)}
+.prog-box .l{font-size:.72rem;color:var(--muted);margin-top:1px}
+.lesson-map{max-width:660px;margin:20px auto;padding:0 16px 50px;display:flex;flex-direction:column;gap:10px}
+.lcard{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:17px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.lcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:13px 0 0 13px}
+.lcard.completed::before{background:#33cc55}
+.lcard.unlocked::before{background:var(--gold)}
+.lcard.locked::before{background:#2a3f5a}
+.lcard:hover:not(.locked){transform:translateX(3px);border-color:#2a4060}
+.lcard.locked{opacity:.42;cursor:not-allowed}
+.l-icon{font-size:1.9rem;flex-shrink:0;width:46px;text-align:center}
+.l-info{flex:1;min-width:0}
+.l-num{font-size:.72rem;color:var(--muted);margin-bottom:2px}
+.l-title{font-size:1rem;font-weight:bold;color:#fff;margin-bottom:2px}
+.l-jp{font-size:.82rem;color:var(--muted);margin-bottom:5px}
+.l-tags{display:flex;gap:5px;flex-wrap:wrap}
+.l-tag{font-size:.68rem;background:rgba(46,117,182,.15);color:#6aabdd;border:1px solid rgba(46,117,182,.3);padding:2px 7px;border-radius:9px}
+.l-status{flex-shrink:0;text-align:right;min-width:44px}
+.s-icon{font-size:1.3rem}
+.s-score{font-size:.72rem;color:var(--muted);margin-top:1px}
+
+/* DETAIL */
+.detail-wrap{max-width:660px;margin:0 auto;padding:16px}
+.btn-back{background:transparent;border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:8px;cursor:pointer;font-size:.85rem;margin-bottom:14px;display:inline-flex;align-items:center;gap:5px}
+.btn-back:hover{border-color:var(--text);color:var(--text)}
+.d-head{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:16px;text-align:center}
+.d-icon{font-size:2.8rem;margin-bottom:10px}
+.d-title{font-size:1.5rem;font-weight:bold;color:#fff;margin-bottom:4px}
+.d-jp{font-size:.9rem;color:var(--muted);margin-bottom:12px}
+.d-tags{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+.act-list{display:flex;flex-direction:column;gap:9px}
+.act-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s}
+.act-card:hover:not(.act-locked){border-color:var(--gold);background:#152030}
+.act-card.act-done{border-color:#33cc55;opacity:.8}
+.act-card.act-locked{opacity:.38;cursor:not-allowed}
+.act-icon{font-size:1.5rem;width:36px;text-align:center;flex-shrink:0}
+.act-body{flex:1}
+.act-title{font-size:.97rem;font-weight:bold;color:#fff;margin-bottom:2px}
+.act-desc{font-size:.78rem;color:var(--muted)}
+.act-check{font-size:1.1rem;color:#33cc55}
+
+/* EXERCISE */
+.ex-wrap{max-width:620px;margin:0 auto;padding:16px}
+.ex-topbar{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.ex-prog-bg{flex:1;background:var(--border);border-radius:99px;height:7px}
+.ex-prog-fill{background:var(--gold);height:7px;border-radius:99px;transition:width .4s}
+.ex-cnt{font-size:.82rem;color:var(--muted);white-space:nowrap}
+.ex-hearts{display:flex;gap:3px;font-size:1rem;white-space:nowrap}
+.ex-card{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:26px;margin-bottom:14px;text-align:center}
+.ex-lbl{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.ex-q{font-size:2.1rem;font-weight:bold;color:#fff;margin-bottom:7px;line-height:1.2}
+.ex-q.sm{font-size:1.25rem}
+.ex-hint{font-size:.85rem;color:var(--muted);margin-bottom:4px}
+.speak-btn{background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);color:var(--gold);padding:7px 16px;border-radius:8px;cursor:pointer;font-size:.88rem;margin-bottom:13px;display:inline-flex;align-items:center;gap:5px}
+.speak-btn:hover{background:rgba(200,168,75,.2)}
+.speak-btn.playing{background:rgba(200,168,75,.22);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:6px}
+.opt{background:#111d2b;border:2px solid var(--border);border-radius:10px;padding:13px 10px;cursor:pointer;font-size:.92rem;color:var(--text);transition:all .15s;line-height:1.3}
+.opt:hover:not(.answered){border-color:var(--gold);background:#1a2a3a}
+.opt.correct{border-color:#33cc55;background:#1a4a2a;color:#80ff9a}
+.opt.wrong{border-color:var(--red);background:#4a1a1a;color:#ff8080}
+.opt.answered{cursor:default}
+.fill-sent{font-size:1.1rem;color:#fff;margin-bottom:13px;line-height:1.6}
+.fill-inp{width:100%;background:#0d1a26;border:2px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:1.05rem;text-align:center;outline:none;transition:border-color .2s}
+.fill-inp:focus{border-color:var(--gold)}
+.fill-inp.correct{border-color:#33cc55;background:#1a4a2a}
+.fill-inp.wrong{border-color:var(--red);background:#4a1a1a}
+.btn-check{width:100%;background:var(--gold);color:#111;border:none;border-radius:10px;padding:11px;font-size:.97rem;font-weight:bold;cursor:pointer;margin-top:10px}
+.btn-check:hover{background:#b89630}
+.btn-check:disabled{opacity:.38;cursor:not-allowed}
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.match-col{display:flex;flex-direction:column;gap:7px}
+.m-item{background:#111d2b;border:2px solid var(--border);border-radius:9px;padding:11px 8px;text-align:center;cursor:pointer;transition:all .15s;font-size:.9rem;min-height:48px;display:flex;align-items:center;justify-content:center}
+.m-item:hover:not(.matched){border-color:var(--gold);background:#1a2a3a}
+.m-item.sel{border-color:var(--gold);background:#1a2a18;box-shadow:0 0 10px rgba(200,168,75,.3)}
+.m-item.matched{border-color:#33cc55;background:#1a4a2a;opacity:.45;pointer-events:none}
+.m-item.bad{border-color:var(--red);background:#4a1a1a;animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.match-prog{color:var(--muted);font-size:.82rem;text-align:center;margin-top:12px}
+.fb{border-radius:9px;padding:12px 16px;margin-top:10px;display:flex;align-items:flex-start;gap:10px}
+.fb.ok{background:rgba(50,200,80,.1);border:1px solid rgba(50,200,80,.3)}
+.fb.no{background:rgba(200,50,50,.1);border:1px solid rgba(200,50,50,.3)}
+.fb-icon{font-size:1.3rem;flex-shrink:0}
+.fb-text{font-size:.88rem;line-height:1.5}
+.fb-text strong{display:block;margin-bottom:2px}
+.fb.ok .fb-text strong{color:#80ff9a}
+.fb.no .fb-text strong{color:#ff8080}
+.btn-next{width:100%;background:var(--mid);color:#fff;border:none;border-radius:10px;padding:12px;font-size:.97rem;font-weight:bold;cursor:pointer;margin-top:10px}
+.btn-next:hover{background:#1e5a9a}
+
+/* RESULTS */
+.res-wrap{max-width:480px;margin:36px auto;padding:16px;text-align:center}
+.res-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px}
+.res-emoji{font-size:3.5rem;margin-bottom:10px}
+.res-title{font-size:1.7rem;font-weight:bold;color:var(--gold);margin-bottom:5px}
+.res-score{font-size:3.2rem;font-weight:bold;color:#fff;margin:14px 0 4px}
+.res-pct{font-size:.9rem;color:var(--muted)}
+.res-stats{display:flex;gap:14px;justify-content:center;margin:16px 0;flex-wrap:wrap}
+.rs{background:#111d2b;border-radius:10px;padding:10px 16px;min-width:72px}
+.rs .n{font-size:1.6rem;font-weight:bold}
+.rs .l{font-size:.7rem;color:var(--muted);margin-top:1px}
+.unlock-box{background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.3);border-radius:10px;padding:12px;margin:14px 0;color:var(--gold);font-weight:bold;font-size:.9rem}
+.retry-note{color:var(--muted);font-size:.85rem;margin-bottom:14px}
+.res-btns{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.btn-ol{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:9px 20px;border-radius:9px;cursor:pointer;font-size:.88rem;font-weight:bold}
+.btn-ol:hover{background:rgba(200,168,75,.15)}
+
+/* MISC */
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:460px){.opts{grid-template-columns:1fr}.match-grid{grid-template-columns:1fr}.l-tags{display:none}}
+</style>
+</head>
+<body>
+
+<div id="top-nav">
+  <a href="japanese.html">&#8592; Library</a>
+  <span style="color:var(--border)">›</span>
+  <span style="color:var(--text);font-size:.82rem">N5 Lessons</span>
+  <div class="user-bar">
+    <span class="xp-pill" id="xp-pill">0 XP</span>
+    <span class="nav-user" id="nav-user"></span>
+    <button class="btn-logout" onclick="logout()">Log out</button>
+  </div>
+</div>
+
+<!-- AUTH -->
+<div id="screen-auth" class="screen active">
+<div class="auth-outer">
+  <div class="auth-head">
+    <div style="font-size:2.8rem;margin-bottom:10px">📚</div>
+    <h1>N5 <span>Lessons</span></h1>
+    <p>Complete each lesson to unlock the next.<br>Score 80%+ on the final quiz to pass.</p>
+  </div>
+  <div class="notice">
+    ⚙️ <strong style="color:var(--text)">Requires setup:</strong> Paste your Google Apps Script URL below.
+    <a href="#" onclick="toggleSetup();return false">How to set up →</a>
+  </div>
+  <div class="fg">
+    <label>Apps Script URL</label>
+    <input type="url" id="api-url" placeholder="https://script.google.com/macros/s/..." oninput="saveUrl()">
+  </div>
+  <div class="auth-tabs">
+    <div class="auth-tab active" id="tab-login-btn" onclick="switchTab('login')">Log In</div>
+    <div class="auth-tab" id="tab-reg-btn" onclick="switchTab('register')">Sign Up</div>
+  </div>
+  <div id="pane-login">
+    <div class="fg"><label>Username</label><input type="text" id="l-user" placeholder="username" autocomplete="username"></div>
+    <div class="fg"><label>Password</label><input type="password" id="l-pass" placeholder="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn-primary" onclick="doLogin()">Log In &#8594;</button>
+  </div>
+  <div id="pane-reg" style="display:none">
+    <div class="fg"><label>Username</label><input type="text" id="r-user" placeholder="3+ chars, letters/numbers/_" autocomplete="username"></div>
+    <div class="fg"><label>Password</label><input type="password" id="r-pass" placeholder="6+ characters" autocomplete="new-password"></div>
+    <div class="fg"><label>Confirm Password</label><input type="password" id="r-pass2" placeholder="repeat password" onkeydown="if(event.key==='Enter')doRegister()"></div>
+    <button class="btn-primary" onclick="doRegister()">Create Account &#8594;</button>
+  </div>
+  <div class="auth-msg" id="auth-msg"></div>
+  <div id="setup-box" class="setup-box" style="display:none">
+    <h3>&#9881;&#65039; Setup Instructions</h3>
+    <ol>
+      <li>Open <a href="https://sheets.google.com" target="_blank" style="color:var(--gold)">Google Sheets</a> &#8594; create a new sheet</li>
+      <li>Go to <strong>Extensions &#8594; Apps Script</strong></li>
+      <li>Delete all code, paste the contents of <strong>apps_script.js</strong></li>
+      <li>Click <strong>Deploy &#8594; New Deployment</strong></li>
+      <li>Type: <strong>Web App</strong> &nbsp;&#183;&nbsp; Execute as: <strong>Me</strong> &nbsp;&#183;&nbsp; Access: <strong>Anyone</strong></li>
+      <li>Copy the URL &#8594; paste it above</li>
+    </ol>
+  </div>
+</div>
+</div>
+
+<!-- MAP -->
+<div id="screen-map" class="screen">
+  <div class="map-head">
+    <h2>N5 Proficiency</h2>
+    <p>Complete each lesson to unlock the next &#183; 80%+ on final quiz to pass</p>
+    <div class="prog-row">
+      <div class="prog-box"><div class="n" id="stat-done">0</div><div class="l">Completed</div></div>
+      <div class="prog-box"><div class="n" id="stat-xp">0</div><div class="l">Total XP</div></div>
+      <div class="prog-box"><div class="n" id="stat-streak">0</div><div class="l">Day Streak</div></div>
+    </div>
+  </div>
+  <div class="lesson-map" id="lesson-map"></div>
+</div>
+
+<!-- DETAIL -->
+<div id="screen-detail" class="screen">
+  <div class="detail-wrap">
+    <button class="btn-back" onclick="showMap()">&#8592; Lessons</button>
+    <div class="d-head" id="d-head"></div>
+    <div class="act-list" id="act-list"></div>
+  </div>
+</div>
+
+<!-- EXERCISE -->
+<div id="screen-exercise" class="screen">
+  <div class="ex-wrap">
+    <div class="ex-topbar">
+      <button class="btn-back" style="margin:0;padding:5px 10px;font-size:.78rem" onclick="confirmExit()">&#10005;</button>
+      <div class="ex-prog-bg"><div class="ex-prog-fill" id="ex-fill" style="width:0%"></div></div>
+      <div class="ex-cnt" id="ex-cnt">0/0</div>
+      <div class="ex-hearts" id="ex-hearts"></div>
+    </div>
+    <div id="ex-content"></div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="screen-results" class="screen">
+  <div class="res-wrap" id="res-content"></div>
+</div>
+
+<script type="application/json" id="d-ex">{"L1": {"mc": [{"q": "おはようございます", "hint": "おはようございます", "options": ["Good morning (polite)", "Good morning (casual)", "Good evening", "Hello / Good afternoon"], "answer": "Good morning (polite)"}, {"q": "おはよう", "hint": "おはよう", "options": ["Hello / Good afternoon", "Good morning (polite)", "Good morning (casual)", "Good evening"], "answer": "Good morning (casual)"}, {"q": "こんにちは", "hint": "こんにちは", "options": ["Good morning (polite)", "Hello / Good afternoon", "Good morning (casual)", "Good evening"], "answer": "Hello / Good afternoon"}, {"q": "こんばんは", "hint": "こんばんは", "options": ["Good morning (polite)", "Good evening", "Hello / Good afternoon", "Good morning (casual)"], "answer": "Good evening"}, {"q": "おやすみなさい", "hint": "おやすみなさい", "options": ["Good morning (polite)", "Hello / Good afternoon", "Good night", "Good morning (casual)"], "answer": "Good night"}, {"q": "さようなら", "hint": "さようなら", "options": ["Hello / Good afternoon", "Goodbye", "Good morning (casual)", "Good morning (polite)"], "answer": "Goodbye"}, {"q": "じゃあね", "hint": "じゃあね", "options": ["Hello / Good afternoon", "Good morning (polite)", "Good morning (casual)", "See you / Bye (casual)"], "answer": "See you / Bye (casual)"}, {"q": "はじめまして", "hint": "はじめまして", "options": ["Good morning (polite)", "Hello / Good afternoon", "Nice to meet you", "Good morning (casual)"], "answer": "Nice to meet you"}, {"q": "よろしくおねがいします", "hint": "よろしくおねがいします", "options": ["Hello / Good afternoon", "Please treat me well", "Good morning (casual)", "Good morning (polite)"], "answer": "Please treat me well"}, {"q": "私", "hint": "わたし", "options": ["Good morning (polite)", "Good morning (casual)", "Hello / Good afternoon", "I / me"], "answer": "I / me"}], "fill": [{"sentence_jp": "＿＿＿は「Good morning (polite)」という意味です。", "sentence_en": "\"Good morning (polite)\" in Japanese is ___.", "answer": "おはようございます", "hint": "おはようございます"}, {"sentence_jp": "＿＿＿は「Good morning (casual)」という意味です。", "sentence_en": "\"Good morning (casual)\" in Japanese is ___.", "answer": "おはよう", "hint": "おはよう"}, {"sentence_jp": "＿＿＿は「Hello / Good afternoon」という意味です。", "sentence_en": "\"Hello / Good afternoon\" in Japanese is ___.", "answer": "こんにちは", "hint": "こんにちは"}, {"sentence_jp": "＿＿＿は「Good evening」という意味です。", "sentence_en": "\"Good evening\" in Japanese is ___.", "answer": "こんばんは", "hint": "こんばんは"}, {"sentence_jp": "＿＿＿は「Good night」という意味です。", "sentence_en": "\"Good night\" in Japanese is ___.", "answer": "おやすみなさい", "hint": "おやすみなさい"}, {"sentence_jp": "＿＿＿は「Goodbye」という意味です。", "sentence_en": "\"Goodbye\" in Japanese is ___.", "answer": "さようなら", "hint": "さようなら"}], "match": [{"jp": "おはようございます", "en": "Good morning (polite)"}, {"jp": "おはよう", "en": "Good morning (casual)"}, {"jp": "こんにちは", "en": "Hello / Good afternoon"}, {"jp": "こんばんは", "en": "Good evening"}, {"jp": "おやすみなさい", "en": "Good night"}, {"jp": "さようなら", "en": "Goodbye"}, {"jp": "じゃあね", "en": "See you / Bye (casual)"}, {"jp": "はじめまして", "en": "Nice to meet you"}], "listen": [{"speak": "おはようございます", "options": ["Good morning (polite)", "Good morning (casual)", "Good evening", "Hello / Good afternoon"], "answer": "Good morning (polite)"}, {"speak": "おはよう", "options": ["Good morning (polite)", "Good morning (casual)", "Hello / Good afternoon", "Good evening"], "answer": "Good morning (casual)"}, {"speak": "こんにちは", "options": ["Good morning (casual)", "Hello / Good afternoon", "Good evening", "Good morning (polite)"], "answer": "Hello / Good afternoon"}, {"speak": "こんばんは", "options": ["Good morning (casual)", "Good morning (polite)", "Good evening", "Hello / Good afternoon"], "answer": "Good evening"}, {"speak": "おやすみなさい", "options": ["Good morning (casual)", "Good night", "Good morning (polite)", "Hello / Good afternoon"], "answer": "Good night"}, {"speak": "さようなら", "options": ["Good morning (casual)", "Hello / Good afternoon", "Good morning (polite)", "Goodbye"], "answer": "Goodbye"}, {"speak": "じゃあね", "options": ["Good morning (casual)", "See you / Bye (casual)", "Good morning (polite)", "Hello / Good afternoon"], "answer": "See you / Bye (casual)"}, {"speak": "はじめまして", "options": ["Hello / Good afternoon", "Good morning (polite)", "Nice to meet you", "Good morning (casual)"], "answer": "Nice to meet you"}], "quiz": [{"type": "mc", "q": "おはようございます", "options": ["Hello / Good afternoon", "Good morning (casual)", "Good evening", "Good morning (polite)"], "answer": "Good morning (polite)", "hint": ""}, {"type": "mc", "q": "おはよう", "options": ["Hello / Good afternoon", "Good morning (casual)", "Good evening", "Good morning (polite)"], "answer": "Good morning (casual)", "hint": ""}, {"type": "mc", "q": "こんにちは", "options": ["Hello / Good afternoon", "Good morning (casual)", "Good evening", "Good morning (polite)"], "answer": "Hello / Good afternoon", "hint": ""}, {"type": "mc", "q": "こんばんは", "options": ["Hello / Good afternoon", "Good morning (casual)", "Good evening", "Good morning (polite)"], "answer": "Good evening", "hint": ""}, {"type": "mc", "q": "おやすみなさい", "options": ["Hello / Good afternoon", "Good morning (casual)", "Good morning (polite)", "Good night"], "answer": "Good night", "hint": ""}, {"type": "mc", "q": "さようなら", "options": ["Hello / Good afternoon", "Good morning (casual)", "Good morning (polite)", "Goodbye"], "answer": "Goodbye", "hint": ""}, {"type": "mc", "q": "じゃあね", "options": ["Hello / Good afternoon", "See you / Bye (casual)", "Good morning (casual)", "Good morning (polite)"], "answer": "See you / Bye (casual)", "hint": ""}, {"type": "mc", "q": "はじめまして", "options": ["Hello / Good afternoon", "Good morning (casual)", "Good morning (polite)", "Nice to meet you"], "answer": "Nice to meet you", "hint": ""}, {"type": "mc", "q": "よろしくおねがいします", "options": ["Hello / Good afternoon", "Good morning (casual)", "Please treat me well", "Good morning (polite)"], "answer": "Please treat me well", "hint": ""}, {"type": "mc", "q": "私", "options": ["Hello / Good afternoon", "Good morning (casual)", "Good morning (polite)", "I / me"], "answer": "I / me", "hint": ""}, {"type": "mc_rev", "q": "you", "options": ["こんにちは", "おはようございます", "おはよう", "あなた"], "answer": "あなた", "hint": ""}, {"type": "mc_rev", "q": "he / him / boyfriend", "options": ["彼", "こんにちは", "おはようございます", "おはよう"], "answer": "彼", "hint": ""}, {"type": "mc_rev", "q": "she / her / girlfriend", "options": ["こんにちは", "彼女", "おはようございます", "おはよう"], "answer": "彼女", "hint": ""}, {"type": "mc_rev", "q": "name", "options": ["こんにちは", "名前", "おはようございます", "おはよう"], "answer": "名前", "hint": ""}, {"type": "mc_rev", "q": "Japanese language", "options": ["こんにちは", "日本語", "おはようございます", "おはよう"], "answer": "日本語", "hint": ""}]}, "L2": {"mc": [{"q": "家族", "hint": "かぞく", "options": ["parents", "(my) father", "(someone’s) father", "family (own)"], "answer": "family (own)"}, {"q": "両親", "hint": "りょうしん", "options": ["parents", "(someone’s) father", "family (own)", "(my) father"], "answer": "parents"}, {"q": "父", "hint": "ちち", "options": ["family (own)", "parents", "(someone’s) father", "(my) father"], "answer": "(my) father"}, {"q": "お父さん", "hint": "おとうさん", "options": ["parents", "family (own)", "(my) father", "(someone’s) father"], "answer": "(someone’s) father"}, {"q": "母", "hint": "はは", "options": ["(my) mother", "parents", "family (own)", "(my) father"], "answer": "(my) mother"}, {"q": "お母さん", "hint": "おかあさん", "options": ["(my) father", "parents", "(someone’s) mother", "family (own)"], "answer": "(someone’s) mother"}, {"q": "兄", "hint": "あに", "options": ["(my) older brother", "parents", "(my) father", "family (own)"], "answer": "(my) older brother"}, {"q": "お兄さん", "hint": "おにいさん", "options": ["(someone’s) older brother", "(my) father", "family (own)", "parents"], "answer": "(someone’s) older brother"}, {"q": "姉", "hint": "あね", "options": ["family (own)", "(my) older sister", "(my) father", "parents"], "answer": "(my) older sister"}, {"q": "お姉さん", "hint": "おねえさん", "options": ["(my) father", "parents", "family (own)", "(someone’s) older sister"], "answer": "(someone’s) older sister"}], "fill": [{"sentence_jp": "＿＿＿は「family (own)」という意味です。", "sentence_en": "\"family (own)\" in Japanese is ___.", "answer": "家族", "hint": "かぞく"}, {"sentence_jp": "＿＿＿は「parents」という意味です。", "sentence_en": "\"parents\" in Japanese is ___.", "answer": "両親", "hint": "りょうしん"}, {"sentence_jp": "＿＿＿は「(someone’s) father」という意味です。", "sentence_en": "\"(someone’s) father\" in Japanese is ___.", "answer": "お父さん", "hint": "おとうさん"}, {"sentence_jp": "＿＿＿は「(someone’s) mother」という意味です。", "sentence_en": "\"(someone’s) mother\" in Japanese is ___.", "answer": "お母さん", "hint": "おかあさん"}, {"sentence_jp": "＿＿＿は「(someone’s) older brother」という意味です。", "sentence_en": "\"(someone’s) older brother\" in Japanese is ___.", "answer": "お兄さん", "hint": "おにいさん"}], "match": [{"jp": "家族", "en": "family (own)"}, {"jp": "両親", "en": "parents"}, {"jp": "父", "en": "(my) father"}, {"jp": "お父さん", "en": "(someone’s) father"}, {"jp": "母", "en": "(my) mother"}, {"jp": "お母さん", "en": "(someone’s) mother"}, {"jp": "兄", "en": "(my) older brother"}, {"jp": "お兄さん", "en": "(someone’s) older brother"}], "listen": [{"speak": "家族", "options": ["parents", "(someone’s) father", "(my) father", "family (own)"], "answer": "family (own)"}, {"speak": "両親", "options": ["(someone’s) father", "family (own)", "(my) father", "parents"], "answer": "parents"}, {"speak": "父", "options": ["parents", "(someone’s) father", "family (own)", "(my) father"], "answer": "(my) father"}, {"speak": "お父さん", "options": ["(someone’s) father", "(my) father", "family (own)", "parents"], "answer": "(someone’s) father"}, {"speak": "母", "options": ["parents", "(my) mother", "family (own)", "(my) father"], "answer": "(my) mother"}, {"speak": "お母さん", "options": ["family (own)", "parents", "(my) father", "(someone’s) mother"], "answer": "(someone’s) mother"}, {"speak": "兄", "options": ["parents", "(my) father", "(my) older brother", "family (own)"], "answer": "(my) older brother"}, {"speak": "お兄さん", "options": ["family (own)", "(someone’s) older brother", "(my) father", "parents"], "answer": "(someone’s) older brother"}], "quiz": [{"type": "mc", "q": "家族", "options": ["(someone’s) father", "family (own)", "(my) father", "parents"], "answer": "family (own)", "hint": ""}, {"type": "mc", "q": "両親", "options": ["(someone’s) father", "family (own)", "(my) father", "parents"], "answer": "parents", "hint": ""}, {"type": "mc", "q": "父", "options": ["(someone’s) father", "family (own)", "(my) father", "parents"], "answer": "(my) father", "hint": ""}, {"type": "mc", "q": "お父さん", "options": ["(someone’s) father", "family (own)", "(my) father", "parents"], "answer": "(someone’s) father", "hint": ""}, {"type": "mc", "q": "母", "options": ["family (own)", "(my) father", "(my) mother", "parents"], "answer": "(my) mother", "hint": ""}, {"type": "mc", "q": "お母さん", "options": ["family (own)", "(my) father", "(someone’s) mother", "parents"], "answer": "(someone’s) mother", "hint": ""}, {"type": "mc", "q": "兄", "options": ["family (own)", "(my) father", "(my) older brother", "parents"], "answer": "(my) older brother", "hint": ""}, {"type": "mc", "q": "お兄さん", "options": ["(someone’s) older brother", "family (own)", "(my) father", "parents"], "answer": "(someone’s) older brother", "hint": ""}, {"type": "mc", "q": "姉", "options": ["family (own)", "(my) older sister", "(my) father", "parents"], "answer": "(my) older sister", "hint": ""}, {"type": "mc", "q": "お姉さん", "options": ["family (own)", "(someone’s) older sister", "(my) father", "parents"], "answer": "(someone’s) older sister", "hint": ""}, {"type": "mc_rev", "q": "(my) younger brother", "options": ["父", "両親", "弟", "家族"], "answer": "弟", "hint": ""}, {"type": "mc_rev", "q": "(someone’s) younger brother", "options": ["父", "両親", "弟さん", "家族"], "answer": "弟さん", "hint": ""}, {"type": "mc_rev", "q": "(my) younger sister", "options": ["父", "妹", "両親", "家族"], "answer": "妹", "hint": ""}, {"type": "mc_rev", "q": "(someone’s) younger sister", "options": ["妹さん", "父", "両親", "家族"], "answer": "妹さん", "hint": ""}, {"type": "mc_rev", "q": "siblings", "options": ["父", "両親", "兄弟", "家族"], "answer": "兄弟", "hint": ""}]}, "L3": {"mc": [{"q": "今", "hint": "いま", "options": ["minutes", "half past", "now", "o’clock"], "answer": "now"}, {"q": "〜じ", "hint": "〜じ", "options": ["now", "minutes", "o’clock", "half past"], "answer": "o’clock"}, {"q": "〜ふん／〜ぷん", "hint": "〜fun/〜pun", "options": ["half past", "minutes", "o’clock", "now"], "answer": "minutes"}, {"q": "〜はん", "hint": "〜はん", "options": ["now", "half past", "minutes", "o’clock"], "answer": "half past"}, {"q": "午前", "hint": "ごぜん", "options": ["now", "AM / morning", "minutes", "o’clock"], "answer": "AM / morning"}, {"q": "午後", "hint": "ごご", "options": ["now", "o’clock", "minutes", "PM / afternoon"], "answer": "PM / afternoon"}, {"q": "朝", "hint": "あさ", "options": ["minutes", "morning", "o’clock", "now"], "answer": "morning"}, {"q": "昼", "hint": "ひる", "options": ["o’clock", "now", "minutes", "noon / daytime"], "answer": "noon / daytime"}, {"q": "夜", "hint": "よる", "options": ["o’clock", "now", "minutes", "evening / night"], "answer": "evening / night"}, {"q": "毎日", "hint": "まいにち", "options": ["now", "every day", "o’clock", "minutes"], "answer": "every day"}], "fill": [{"sentence_jp": "＿＿＿は「o’clock」という意味です。", "sentence_en": "\"o’clock\" in Japanese is ___.", "answer": "〜じ", "hint": "〜じ"}, {"sentence_jp": "＿＿＿は「minutes」という意味です。", "sentence_en": "\"minutes\" in Japanese is ___.", "answer": "〜ふん／〜ぷん", "hint": "〜fun/〜pun"}, {"sentence_jp": "＿＿＿は「half past」という意味です。", "sentence_en": "\"half past\" in Japanese is ___.", "answer": "〜はん", "hint": "〜はん"}, {"sentence_jp": "＿＿＿は「AM / morning」という意味です。", "sentence_en": "\"AM / morning\" in Japanese is ___.", "answer": "午前", "hint": "ごぜん"}, {"sentence_jp": "＿＿＿は「PM / afternoon」という意味です。", "sentence_en": "\"PM / afternoon\" in Japanese is ___.", "answer": "午後", "hint": "ごご"}], "match": [{"jp": "今", "en": "now"}, {"jp": "〜じ", "en": "o’clock"}, {"jp": "〜ふん／〜ぷん", "en": "minutes"}, {"jp": "〜はん", "en": "half past"}, {"jp": "午前", "en": "AM / morning"}, {"jp": "午後", "en": "PM / afternoon"}, {"jp": "朝", "en": "morning"}, {"jp": "昼", "en": "noon / daytime"}], "listen": [{"speak": "今", "options": ["minutes", "now", "o’clock", "half past"], "answer": "now"}, {"speak": "〜じ", "options": ["now", "o’clock", "half past", "minutes"], "answer": "o’clock"}, {"speak": "〜ふん／〜ぷん", "options": ["o’clock", "half past", "now", "minutes"], "answer": "minutes"}, {"speak": "〜はん", "options": ["now", "minutes", "o’clock", "half past"], "answer": "half past"}, {"speak": "午前", "options": ["minutes", "now", "AM / morning", "o’clock"], "answer": "AM / morning"}, {"speak": "午後", "options": ["now", "o’clock", "PM / afternoon", "minutes"], "answer": "PM / afternoon"}, {"speak": "朝", "options": ["now", "morning", "o’clock", "minutes"], "answer": "morning"}, {"speak": "昼", "options": ["noon / daytime", "now", "minutes", "o’clock"], "answer": "noon / daytime"}], "quiz": [{"type": "mc", "q": "今", "options": ["minutes", "o’clock", "now", "half past"], "answer": "now", "hint": ""}, {"type": "mc", "q": "〜じ", "options": ["minutes", "o’clock", "now", "half past"], "answer": "o’clock", "hint": ""}, {"type": "mc", "q": "〜ふん／〜ぷん", "options": ["minutes", "o’clock", "now", "half past"], "answer": "minutes", "hint": ""}, {"type": "mc", "q": "〜はん", "options": ["minutes", "o’clock", "now", "half past"], "answer": "half past", "hint": ""}, {"type": "mc", "q": "午前", "options": ["minutes", "AM / morning", "o’clock", "now"], "answer": "AM / morning", "hint": ""}, {"type": "mc", "q": "午後", "options": ["minutes", "o’clock", "now", "PM / afternoon"], "answer": "PM / afternoon", "hint": ""}, {"type": "mc", "q": "朝", "options": ["minutes", "o’clock", "now", "morning"], "answer": "morning", "hint": ""}, {"type": "mc", "q": "昼", "options": ["minutes", "noon / daytime", "o’clock", "now"], "answer": "noon / daytime", "hint": ""}, {"type": "mc", "q": "夜", "options": ["minutes", "o’clock", "now", "evening / night"], "answer": "evening / night", "hint": ""}, {"type": "mc", "q": "毎日", "options": ["minutes", "every day", "o’clock", "now"], "answer": "every day", "hint": ""}, {"type": "mc_rev", "q": "every morning", "options": ["毎朝", "〜ふん／〜ぷん", "〜じ", "今"], "answer": "毎朝", "hint": ""}, {"type": "mc_rev", "q": "every evening", "options": ["毎晩", "〜ふん／〜ぷん", "〜じ", "今"], "answer": "毎晩", "hint": ""}, {"type": "mc_rev", "q": "today", "options": ["〜ふん／〜ぷん", "〜じ", "今", "今日"], "answer": "今日", "hint": ""}, {"type": "mc_rev", "q": "tomorrow", "options": ["明日", "〜ふん／〜ぷん", "〜じ", "今"], "answer": "明日", "hint": ""}, {"type": "mc_rev", "q": "yesterday", "options": ["昨日", "〜ふん／〜ぷん", "〜じ", "今"], "answer": "昨日", "hint": ""}]}, "L4": {"mc": [{"q": "食べ物", "hint": "たべもの", "options": ["bread", "drink / beverage", "food", "cooked rice / meal"], "answer": "food"}, {"q": "飲み物", "hint": "のみもの", "options": ["bread", "drink / beverage", "food", "cooked rice / meal"], "answer": "drink / beverage"}, {"q": "ご飯", "hint": "ごはん", "options": ["drink / beverage", "cooked rice / meal", "bread", "food"], "answer": "cooked rice / meal"}, {"q": "パン", "hint": "パン", "options": ["drink / beverage", "food", "cooked rice / meal", "bread"], "answer": "bread"}, {"q": "肉", "hint": "にく", "options": ["drink / beverage", "cooked rice / meal", "meat", "food"], "answer": "meat"}, {"q": "魚", "hint": "さかな", "options": ["drink / beverage", "food", "cooked rice / meal", "fish"], "answer": "fish"}, {"q": "野菜", "hint": "やさい", "options": ["food", "vegetables", "drink / beverage", "cooked rice / meal"], "answer": "vegetables"}, {"q": "卵", "hint": "たまご", "options": ["egg", "cooked rice / meal", "drink / beverage", "food"], "answer": "egg"}, {"q": "果物", "hint": "くだもの", "options": ["fruit", "drink / beverage", "food", "cooked rice / meal"], "answer": "fruit"}, {"q": "寿司", "hint": "すし", "options": ["cooked rice / meal", "drink / beverage", "food", "sushi"], "answer": "sushi"}], "fill": [{"sentence_jp": "＿＿＿は「food」という意味です。", "sentence_en": "\"food\" in Japanese is ___.", "answer": "食べ物", "hint": "たべもの"}, {"sentence_jp": "＿＿＿は「drink / beverage」という意味です。", "sentence_en": "\"drink / beverage\" in Japanese is ___.", "answer": "飲み物", "hint": "のみもの"}, {"sentence_jp": "＿＿＿は「cooked rice / meal」という意味です。", "sentence_en": "\"cooked rice / meal\" in Japanese is ___.", "answer": "ご飯", "hint": "ごはん"}, {"sentence_jp": "＿＿＿は「bread」という意味です。", "sentence_en": "\"bread\" in Japanese is ___.", "answer": "パン", "hint": "パン"}, {"sentence_jp": "＿＿＿は「vegetables」という意味です。", "sentence_en": "\"vegetables\" in Japanese is ___.", "answer": "野菜", "hint": "やさい"}], "match": [{"jp": "食べ物", "en": "food"}, {"jp": "飲み物", "en": "drink / beverage"}, {"jp": "ご飯", "en": "cooked rice / meal"}, {"jp": "パン", "en": "bread"}, {"jp": "肉", "en": "meat"}, {"jp": "魚", "en": "fish"}, {"jp": "野菜", "en": "vegetables"}, {"jp": "卵", "en": "egg"}], "listen": [{"speak": "食べ物", "options": ["bread", "drink / beverage", "food", "cooked rice / meal"], "answer": "food"}, {"speak": "飲み物", "options": ["bread", "food", "cooked rice / meal", "drink / beverage"], "answer": "drink / beverage"}, {"speak": "ご飯", "options": ["bread", "drink / beverage", "food", "cooked rice / meal"], "answer": "cooked rice / meal"}, {"speak": "パン", "options": ["bread", "food", "drink / beverage", "cooked rice / meal"], "answer": "bread"}, {"speak": "肉", "options": ["cooked rice / meal", "food", "meat", "drink / beverage"], "answer": "meat"}, {"speak": "魚", "options": ["fish", "drink / beverage", "food", "cooked rice / meal"], "answer": "fish"}, {"speak": "野菜", "options": ["cooked rice / meal", "vegetables", "drink / beverage", "food"], "answer": "vegetables"}, {"speak": "卵", "options": ["drink / beverage", "egg", "cooked rice / meal", "food"], "answer": "egg"}], "quiz": [{"type": "mc", "q": "食べ物", "options": ["bread", "food", "cooked rice / meal", "drink / beverage"], "answer": "food", "hint": ""}, {"type": "mc", "q": "飲み物", "options": ["bread", "food", "cooked rice / meal", "drink / beverage"], "answer": "drink / beverage", "hint": ""}, {"type": "mc", "q": "ご飯", "options": ["bread", "food", "cooked rice / meal", "drink / beverage"], "answer": "cooked rice / meal", "hint": ""}, {"type": "mc", "q": "パン", "options": ["bread", "food", "cooked rice / meal", "drink / beverage"], "answer": "bread", "hint": ""}, {"type": "mc", "q": "肉", "options": ["meat", "food", "cooked rice / meal", "drink / beverage"], "answer": "meat", "hint": ""}, {"type": "mc", "q": "魚", "options": ["fish", "food", "cooked rice / meal", "drink / beverage"], "answer": "fish", "hint": ""}, {"type": "mc", "q": "野菜", "options": ["food", "cooked rice / meal", "drink / beverage", "vegetables"], "answer": "vegetables", "hint": ""}, {"type": "mc", "q": "卵", "options": ["food", "cooked rice / meal", "egg", "drink / beverage"], "answer": "egg", "hint": ""}, {"type": "mc", "q": "果物", "options": ["food", "cooked rice / meal", "drink / beverage", "fruit"], "answer": "fruit", "hint": ""}, {"type": "mc", "q": "寿司", "options": ["sushi", "food", "cooked rice / meal", "drink / beverage"], "answer": "sushi", "hint": ""}, {"type": "mc_rev", "q": "ramen", "options": ["食べ物", "ご飯", "ラーメン", "飲み物"], "answer": "ラーメン", "hint": ""}, {"type": "mc_rev", "q": "water", "options": ["食べ物", "ご飯", "水", "飲み物"], "answer": "水", "hint": ""}, {"type": "mc_rev", "q": "green tea", "options": ["お茶", "食べ物", "ご飯", "飲み物"], "answer": "お茶", "hint": ""}, {"type": "mc_rev", "q": "coffee", "options": ["食べ物", "コーヒー", "ご飯", "飲み物"], "answer": "コーヒー", "hint": ""}, {"type": "mc_rev", "q": "juice", "options": ["食べ物", "ご飯", "ジュース", "飲み物"], "answer": "ジュース", "hint": ""}]}, "L5": {"mc": [{"q": "どこ", "hint": "どこ", "options": ["train", "station", "where", "bus"], "answer": "where"}, {"q": "駅", "hint": "えき", "options": ["bus", "where", "station", "train"], "answer": "station"}, {"q": "電車", "hint": "でんしゃ", "options": ["train", "bus", "station", "where"], "answer": "train"}, {"q": "バス", "hint": "バス", "options": ["where", "train", "station", "bus"], "answer": "bus"}, {"q": "地下鉄", "hint": "ちかてつ", "options": ["station", "train", "subway", "where"], "answer": "subway"}, {"q": "タクシー", "hint": "タクシー", "options": ["train", "taxi", "station", "where"], "answer": "taxi"}, {"q": "自転車", "hint": "じてんしゃ", "options": ["train", "where", "bicycle", "station"], "answer": "bicycle"}, {"q": "車", "hint": "くるま", "options": ["car", "where", "train", "station"], "answer": "car"}, {"q": "道", "hint": "みち", "options": ["where", "road / way / path", "station", "train"], "answer": "road / way / path"}, {"q": "右", "hint": "みぎ", "options": ["right", "where", "station", "train"], "answer": "right"}], "fill": [{"sentence_jp": "＿＿＿は「where」という意味です。", "sentence_en": "\"where\" in Japanese is ___.", "answer": "どこ", "hint": "どこ"}, {"sentence_jp": "＿＿＿は「train」という意味です。", "sentence_en": "\"train\" in Japanese is ___.", "answer": "電車", "hint": "でんしゃ"}, {"sentence_jp": "＿＿＿は「bus」という意味です。", "sentence_en": "\"bus\" in Japanese is ___.", "answer": "バス", "hint": "バス"}, {"sentence_jp": "＿＿＿は「subway」という意味です。", "sentence_en": "\"subway\" in Japanese is ___.", "answer": "地下鉄", "hint": "ちかてつ"}, {"sentence_jp": "＿＿＿は「taxi」という意味です。", "sentence_en": "\"taxi\" in Japanese is ___.", "answer": "タクシー", "hint": "タクシー"}, {"sentence_jp": "＿＿＿は「bicycle」という意味です。", "sentence_en": "\"bicycle\" in Japanese is ___.", "answer": "自転車", "hint": "じてんしゃ"}], "match": [{"jp": "どこ", "en": "where"}, {"jp": "駅", "en": "station"}, {"jp": "電車", "en": "train"}, {"jp": "バス", "en": "bus"}, {"jp": "地下鉄", "en": "subway"}, {"jp": "タクシー", "en": "taxi"}, {"jp": "自転車", "en": "bicycle"}, {"jp": "車", "en": "car"}], "listen": [{"speak": "どこ", "options": ["bus", "where", "train", "station"], "answer": "where"}, {"speak": "駅", "options": ["where", "bus", "train", "station"], "answer": "station"}, {"speak": "電車", "options": ["where", "bus", "station", "train"], "answer": "train"}, {"speak": "バス", "options": ["train", "station", "bus", "where"], "answer": "bus"}, {"speak": "地下鉄", "options": ["train", "station", "where", "subway"], "answer": "subway"}, {"speak": "タクシー", "options": ["taxi", "where", "station", "train"], "answer": "taxi"}, {"speak": "自転車", "options": ["where", "train", "station", "bicycle"], "answer": "bicycle"}, {"speak": "車", "options": ["where", "train", "car", "station"], "answer": "car"}], "quiz": [{"type": "mc", "q": "どこ", "options": ["train", "where", "bus", "station"], "answer": "where", "hint": ""}, {"type": "mc", "q": "駅", "options": ["train", "where", "bus", "station"], "answer": "station", "hint": ""}, {"type": "mc", "q": "電車", "options": ["train", "where", "bus", "station"], "answer": "train", "hint": ""}, {"type": "mc", "q": "バス", "options": ["train", "where", "bus", "station"], "answer": "bus", "hint": ""}, {"type": "mc", "q": "地下鉄", "options": ["train", "where", "subway", "station"], "answer": "subway", "hint": ""}, {"type": "mc", "q": "タクシー", "options": ["train", "where", "taxi", "station"], "answer": "taxi", "hint": ""}, {"type": "mc", "q": "自転車", "options": ["train", "where", "bicycle", "station"], "answer": "bicycle", "hint": ""}, {"type": "mc", "q": "車", "options": ["train", "car", "where", "station"], "answer": "car", "hint": ""}, {"type": "mc", "q": "道", "options": ["train", "where", "road / way / path", "station"], "answer": "road / way / path", "hint": ""}, {"type": "mc", "q": "右", "options": ["train", "where", "right", "station"], "answer": "right", "hint": ""}, {"type": "mc_rev", "q": "left", "options": ["駅", "電車", "どこ", "左"], "answer": "左", "hint": ""}, {"type": "mc_rev", "q": "straight ahead", "options": ["駅", "電車", "まっすぐ", "どこ"], "answer": "まっすぐ", "hint": ""}, {"type": "mc_rev", "q": "nearby / near", "options": ["駅", "電車", "近く", "どこ"], "answer": "近く", "hint": ""}, {"type": "mc_rev", "q": "next to", "options": ["隣", "駅", "電車", "どこ"], "answer": "隣", "hint": ""}, {"type": "mc_rev", "q": "in front of / before", "options": ["駅", "電車", "前", "どこ"], "answer": "前", "hint": ""}]}, "L6": {"mc": [{"q": "買い物", "hint": "かいもの", "options": ["shop / store", "department store", "shopping", "supermarket"], "answer": "shopping"}, {"q": "店", "hint": "みせ", "options": ["supermarket", "shopping", "department store", "shop / store"], "answer": "shop / store"}, {"q": "スーパー", "hint": "スーパー", "options": ["shopping", "supermarket", "shop / store", "department store"], "answer": "supermarket"}, {"q": "デパート", "hint": "デパート", "options": ["supermarket", "shop / store", "shopping", "department store"], "answer": "department store"}, {"q": "コンビニ", "hint": "コンビニ", "options": ["shopping", "shop / store", "supermarket", "convenience store"], "answer": "convenience store"}, {"q": "いくら", "hint": "いくら", "options": ["supermarket", "how much", "shop / store", "shopping"], "answer": "how much"}, {"q": "〜えん", "hint": "〜えん", "options": ["shop / store", "supermarket", "yen", "shopping"], "answer": "yen"}, {"q": "高い", "hint": "たかい", "options": ["shop / store", "supermarket", "shopping", "expensive / tall"], "answer": "expensive / tall"}, {"q": "安い", "hint": "やすい", "options": ["shopping", "cheap / inexpensive", "supermarket", "shop / store"], "answer": "cheap / inexpensive"}, {"q": "新しい", "hint": "あたらしい", "options": ["shop / store", "shopping", "supermarket", "new"], "answer": "new"}], "fill": [{"sentence_jp": "＿＿＿は「shopping」という意味です。", "sentence_en": "\"shopping\" in Japanese is ___.", "answer": "買い物", "hint": "かいもの"}, {"sentence_jp": "＿＿＿は「supermarket」という意味です。", "sentence_en": "\"supermarket\" in Japanese is ___.", "answer": "スーパー", "hint": "スーパー"}, {"sentence_jp": "＿＿＿は「department store」という意味です。", "sentence_en": "\"department store\" in Japanese is ___.", "answer": "デパート", "hint": "デパート"}, {"sentence_jp": "＿＿＿は「convenience store」という意味です。", "sentence_en": "\"convenience store\" in Japanese is ___.", "answer": "コンビニ", "hint": "コンビニ"}, {"sentence_jp": "＿＿＿は「how much」という意味です。", "sentence_en": "\"how much\" in Japanese is ___.", "answer": "いくら", "hint": "いくら"}, {"sentence_jp": "＿＿＿は「yen」という意味です。", "sentence_en": "\"yen\" in Japanese is ___.", "answer": "〜えん", "hint": "〜えん"}], "match": [{"jp": "買い物", "en": "shopping"}, {"jp": "店", "en": "shop / store"}, {"jp": "スーパー", "en": "supermarket"}, {"jp": "デパート", "en": "department store"}, {"jp": "コンビニ", "en": "convenience store"}, {"jp": "いくら", "en": "how much"}, {"jp": "〜えん", "en": "yen"}, {"jp": "高い", "en": "expensive / tall"}], "listen": [{"speak": "買い物", "options": ["supermarket", "department store", "shop / store", "shopping"], "answer": "shopping"}, {"speak": "店", "options": ["shopping", "shop / store", "department store", "supermarket"], "answer": "shop / store"}, {"speak": "スーパー", "options": ["supermarket", "shopping", "department store", "shop / store"], "answer": "supermarket"}, {"speak": "デパート", "options": ["shop / store", "shopping", "supermarket", "department store"], "answer": "department store"}, {"speak": "コンビニ", "options": ["convenience store", "supermarket", "shopping", "shop / store"], "answer": "convenience store"}, {"speak": "いくら", "options": ["supermarket", "shop / store", "shopping", "how much"], "answer": "how much"}, {"speak": "〜えん", "options": ["yen", "shop / store", "supermarket", "shopping"], "answer": "yen"}, {"speak": "高い", "options": ["shopping", "supermarket", "shop / store", "expensive / tall"], "answer": "expensive / tall"}], "quiz": [{"type": "mc", "q": "買い物", "options": ["shopping", "shop / store", "supermarket", "department store"], "answer": "shopping", "hint": ""}, {"type": "mc", "q": "店", "options": ["shopping", "shop / store", "supermarket", "department store"], "answer": "shop / store", "hint": ""}, {"type": "mc", "q": "スーパー", "options": ["shopping", "shop / store", "supermarket", "department store"], "answer": "supermarket", "hint": ""}, {"type": "mc", "q": "デパート", "options": ["shopping", "shop / store", "supermarket", "department store"], "answer": "department store", "hint": ""}, {"type": "mc", "q": "コンビニ", "options": ["convenience store", "shopping", "shop / store", "supermarket"], "answer": "convenience store", "hint": ""}, {"type": "mc", "q": "いくら", "options": ["shopping", "shop / store", "supermarket", "how much"], "answer": "how much", "hint": ""}, {"type": "mc", "q": "〜えん", "options": ["shopping", "shop / store", "supermarket", "yen"], "answer": "yen", "hint": ""}, {"type": "mc", "q": "高い", "options": ["shopping", "shop / store", "expensive / tall", "supermarket"], "answer": "expensive / tall", "hint": ""}, {"type": "mc", "q": "安い", "options": ["shopping", "cheap / inexpensive", "shop / store", "supermarket"], "answer": "cheap / inexpensive", "hint": ""}, {"type": "mc", "q": "新しい", "options": ["new", "shopping", "shop / store", "supermarket"], "answer": "new", "hint": ""}, {"type": "mc_rev", "q": "old (objects)", "options": ["スーパー", "店", "古い", "買い物"], "answer": "古い", "hint": ""}, {"type": "mc_rev", "q": "big / large", "options": ["大きい", "スーパー", "店", "買い物"], "answer": "大きい", "hint": ""}, {"type": "mc_rev", "q": "small / little", "options": ["スーパー", "小さい", "店", "買い物"], "answer": "小さい", "hint": ""}, {"type": "mc_rev", "q": "to buy", "options": ["買う", "スーパー", "店", "買い物"], "answer": "買う", "hint": ""}, {"type": "mc_rev", "q": "to sell", "options": ["スーパー", "店", "売る", "買い物"], "answer": "売る", "hint": ""}]}, "L7": {"mc": [{"q": "家", "hint": "ie", "options": ["apartment", "house / home", "kitchen", "room"], "answer": "house / home"}, {"q": "アパート", "hint": "アパート", "options": ["apartment", "house / home", "room", "kitchen"], "answer": "apartment"}, {"q": "部屋", "hint": "へや", "options": ["kitchen", "apartment", "room", "house / home"], "answer": "room"}, {"q": "台所", "hint": "だいどころ", "options": ["house / home", "room", "apartment", "kitchen"], "answer": "kitchen"}, {"q": "お風呂", "hint": "おふろ", "options": ["house / home", "room", "apartment", "bath"], "answer": "bath"}, {"q": "トイレ", "hint": "トイレ", "options": ["toilet / bathroom", "apartment", "room", "house / home"], "answer": "toilet / bathroom"}, {"q": "庭", "hint": "にわ", "options": ["room", "house / home", "apartment", "garden"], "answer": "garden"}, {"q": "窓", "hint": "まど", "options": ["house / home", "window", "apartment", "room"], "answer": "window"}, {"q": "ドア", "hint": "ドア", "options": ["apartment", "room", "door", "house / home"], "answer": "door"}, {"q": "電気", "hint": "でんき", "options": ["electricity / light", "house / home", "apartment", "room"], "answer": "electricity / light"}], "fill": [{"sentence_jp": "＿＿＿は「apartment」という意味です。", "sentence_en": "\"apartment\" in Japanese is ___.", "answer": "アパート", "hint": "アパート"}, {"sentence_jp": "＿＿＿は「room」という意味です。", "sentence_en": "\"room\" in Japanese is ___.", "answer": "部屋", "hint": "へや"}, {"sentence_jp": "＿＿＿は「kitchen」という意味です。", "sentence_en": "\"kitchen\" in Japanese is ___.", "answer": "台所", "hint": "だいどころ"}, {"sentence_jp": "＿＿＿は「bath」という意味です。", "sentence_en": "\"bath\" in Japanese is ___.", "answer": "お風呂", "hint": "おふろ"}, {"sentence_jp": "＿＿＿は「toilet / bathroom」という意味です。", "sentence_en": "\"toilet / bathroom\" in Japanese is ___.", "answer": "トイレ", "hint": "トイレ"}], "match": [{"jp": "家", "en": "house / home"}, {"jp": "アパート", "en": "apartment"}, {"jp": "部屋", "en": "room"}, {"jp": "台所", "en": "kitchen"}, {"jp": "お風呂", "en": "bath"}, {"jp": "トイレ", "en": "toilet / bathroom"}, {"jp": "庭", "en": "garden"}, {"jp": "窓", "en": "window"}], "listen": [{"speak": "家", "options": ["apartment", "room", "house / home", "kitchen"], "answer": "house / home"}, {"speak": "アパート", "options": ["room", "apartment", "kitchen", "house / home"], "answer": "apartment"}, {"speak": "部屋", "options": ["kitchen", "room", "apartment", "house / home"], "answer": "room"}, {"speak": "台所", "options": ["apartment", "house / home", "room", "kitchen"], "answer": "kitchen"}, {"speak": "お風呂", "options": ["apartment", "room", "house / home", "bath"], "answer": "bath"}, {"speak": "トイレ", "options": ["toilet / bathroom", "apartment", "room", "house / home"], "answer": "toilet / bathroom"}, {"speak": "庭", "options": ["house / home", "apartment", "garden", "room"], "answer": "garden"}, {"speak": "窓", "options": ["apartment", "window", "room", "house / home"], "answer": "window"}], "quiz": [{"type": "mc", "q": "家", "options": ["kitchen", "apartment", "room", "house / home"], "answer": "house / home", "hint": ""}, {"type": "mc", "q": "アパート", "options": ["kitchen", "apartment", "room", "house / home"], "answer": "apartment", "hint": ""}, {"type": "mc", "q": "部屋", "options": ["kitchen", "apartment", "room", "house / home"], "answer": "room", "hint": ""}, {"type": "mc", "q": "台所", "options": ["kitchen", "apartment", "room", "house / home"], "answer": "kitchen", "hint": ""}, {"type": "mc", "q": "お風呂", "options": ["apartment", "room", "bath", "house / home"], "answer": "bath", "hint": ""}, {"type": "mc", "q": "トイレ", "options": ["toilet / bathroom", "apartment", "room", "house / home"], "answer": "toilet / bathroom", "hint": ""}, {"type": "mc", "q": "庭", "options": ["garden", "apartment", "room", "house / home"], "answer": "garden", "hint": ""}, {"type": "mc", "q": "窓", "options": ["window", "apartment", "room", "house / home"], "answer": "window", "hint": ""}, {"type": "mc", "q": "ドア", "options": ["apartment", "room", "door", "house / home"], "answer": "door", "hint": ""}, {"type": "mc", "q": "電気", "options": ["apartment", "room", "electricity / light", "house / home"], "answer": "electricity / light", "hint": ""}, {"type": "mc_rev", "q": "to live / reside", "options": ["アパート", "部屋", "家", "住む"], "answer": "住む", "hint": ""}, {"type": "mc_rev", "q": "to work", "options": ["アパート", "部屋", "家", "働く"], "answer": "働く", "hint": ""}, {"type": "mc_rev", "q": "to rest / take a day off", "options": ["休む", "アパート", "部屋", "家"], "answer": "休む", "hint": ""}, {"type": "mc_rev", "q": "to clean", "options": ["掃除する", "アパート", "部屋", "家"], "answer": "掃除する", "hint": ""}, {"type": "mc_rev", "q": "to do laundry", "options": ["洗濯する", "アパート", "部屋", "家"], "answer": "洗濯する", "hint": ""}]}, "L8": {"mc": [{"q": "趣味", "hint": "しゅみ", "options": ["music", "hobby", "sport", "movie"], "answer": "hobby"}, {"q": "音楽", "hint": "おんがく", "options": ["movie", "sport", "hobby", "music"], "answer": "music"}, {"q": "映画", "hint": "えいが", "options": ["sport", "movie", "music", "hobby"], "answer": "movie"}, {"q": "スポーツ", "hint": "スポーツ", "options": ["hobby", "movie", "music", "sport"], "answer": "sport"}, {"q": "旅行", "hint": "りょこう", "options": ["music", "movie", "hobby", "travel / trip"], "answer": "travel / trip"}, {"q": "ゲーム", "hint": "ゲーム", "options": ["game", "movie", "hobby", "music"], "answer": "game"}, {"q": "りょうり", "hint": "りょうり", "options": ["cooking / cuisine", "hobby", "music", "movie"], "answer": "cooking / cuisine"}, {"q": "絵", "hint": "え", "options": ["hobby", "movie", "music", "picture / painting"], "answer": "picture / painting"}, {"q": "歌", "hint": "うた", "options": ["music", "song", "movie", "hobby"], "answer": "song"}, {"q": "読む", "hint": "よむ", "options": ["movie", "music", "to read", "hobby"], "answer": "to read"}], "fill": [{"sentence_jp": "＿＿＿は「hobby」という意味です。", "sentence_en": "\"hobby\" in Japanese is ___.", "answer": "趣味", "hint": "しゅみ"}, {"sentence_jp": "＿＿＿は「music」という意味です。", "sentence_en": "\"music\" in Japanese is ___.", "answer": "音楽", "hint": "おんがく"}, {"sentence_jp": "＿＿＿は「movie」という意味です。", "sentence_en": "\"movie\" in Japanese is ___.", "answer": "映画", "hint": "えいが"}, {"sentence_jp": "＿＿＿は「sport」という意味です。", "sentence_en": "\"sport\" in Japanese is ___.", "answer": "スポーツ", "hint": "スポーツ"}, {"sentence_jp": "＿＿＿は「travel / trip」という意味です。", "sentence_en": "\"travel / trip\" in Japanese is ___.", "answer": "旅行", "hint": "りょこう"}, {"sentence_jp": "＿＿＿は「game」という意味です。", "sentence_en": "\"game\" in Japanese is ___.", "answer": "ゲーム", "hint": "ゲーム"}], "match": [{"jp": "趣味", "en": "hobby"}, {"jp": "音楽", "en": "music"}, {"jp": "映画", "en": "movie"}, {"jp": "スポーツ", "en": "sport"}, {"jp": "旅行", "en": "travel / trip"}, {"jp": "ゲーム", "en": "game"}, {"jp": "りょうり", "en": "cooking / cuisine"}, {"jp": "絵", "en": "picture / painting"}], "listen": [{"speak": "趣味", "options": ["movie", "hobby", "music", "sport"], "answer": "hobby"}, {"speak": "音楽", "options": ["music", "sport", "hobby", "movie"], "answer": "music"}, {"speak": "映画", "options": ["movie", "sport", "hobby", "music"], "answer": "movie"}, {"speak": "スポーツ", "options": ["hobby", "music", "movie", "sport"], "answer": "sport"}, {"speak": "旅行", "options": ["hobby", "movie", "music", "travel / trip"], "answer": "travel / trip"}, {"speak": "ゲーム", "options": ["hobby", "music", "movie", "game"], "answer": "game"}, {"speak": "りょうり", "options": ["cooking / cuisine", "movie", "music", "hobby"], "answer": "cooking / cuisine"}, {"speak": "絵", "options": ["hobby", "picture / painting", "music", "movie"], "answer": "picture / painting"}], "quiz": [{"type": "mc", "q": "趣味", "options": ["hobby", "movie", "sport", "music"], "answer": "hobby", "hint": ""}, {"type": "mc", "q": "音楽", "options": ["hobby", "movie", "sport", "music"], "answer": "music", "hint": ""}, {"type": "mc", "q": "映画", "options": ["hobby", "movie", "sport", "music"], "answer": "movie", "hint": ""}, {"type": "mc", "q": "スポーツ", "options": ["hobby", "movie", "sport", "music"], "answer": "sport", "hint": ""}, {"type": "mc", "q": "旅行", "options": ["hobby", "movie", "travel / trip", "music"], "answer": "travel / trip", "hint": ""}, {"type": "mc", "q": "ゲーム", "options": ["hobby", "movie", "game", "music"], "answer": "game", "hint": ""}, {"type": "mc", "q": "りょうり", "options": ["hobby", "movie", "cooking / cuisine", "music"], "answer": "cooking / cuisine", "hint": ""}, {"type": "mc", "q": "絵", "options": ["hobby", "movie", "music", "picture / painting"], "answer": "picture / painting", "hint": ""}, {"type": "mc", "q": "歌", "options": ["hobby", "movie", "song", "music"], "answer": "song", "hint": ""}, {"type": "mc", "q": "読む", "options": ["hobby", "to read", "movie", "music"], "answer": "to read", "hint": ""}, {"type": "mc_rev", "q": "to write / draw", "options": ["映画", "音楽", "書く", "趣味"], "answer": "書く", "hint": ""}, {"type": "mc_rev", "q": "to listen / hear / ask", "options": ["聞く", "映画", "音楽", "趣味"], "answer": "聞く", "hint": ""}, {"type": "mc_rev", "q": "to see / watch / look", "options": ["映画", "見る", "音楽", "趣味"], "answer": "見る", "hint": ""}, {"type": "mc_rev", "q": "to sing", "options": ["映画", "歌う", "音楽", "趣味"], "answer": "歌う", "hint": ""}, {"type": "mc_rev", "q": "to dance", "options": ["映画", "踊る", "音楽", "趣味"], "answer": "踊る", "hint": ""}]}}</script>
+<script type="application/json" id="d-meta">{"L1": {"title": "Greetings & Self-Introduction", "jp": "あいさつ・じこしょうかい", "icon": "👋", "grammar": ["～は～です", "～ですか", "～じゃないです"], "color": "#2E75B6"}, "L2": {"title": "Family & People", "jp": "かぞくと　ひとびと", "icon": "👨‍👩‍👧", "grammar": ["～の (possession)", "～も", "～と"], "color": "#1a7a4a"}, "L3": {"title": "Daily Routine & Time", "jp": "まいにちの　せいかつ", "icon": "⏰", "grammar": ["～ます/～ません", "～てから", "Time expressions"], "color": "#7a3a8a"}, "L4": {"title": "Food & Eating", "jp": "たべもの", "icon": "🍱", "grammar": ["～が好きです", "～を食べます", "～はどうですか"], "color": "#a84a1a"}, "L5": {"title": "Getting Around", "jp": "いどうする", "icon": "🚃", "grammar": ["～で (means)", "～に行きます", "～はどこですか"], "color": "#1a5a7a"}, "L6": {"title": "Shopping & Money", "jp": "かいもの", "icon": "🛍️", "grammar": ["～をください", "いくらですか", "～円です"], "color": "#5a1a7a"}, "L7": {"title": "Home & Daily Life", "jp": "いえと　せいかつ", "icon": "🏠", "grammar": ["～ている", "～てある", "～にある/いる"], "color": "#7a5a1a"}, "L8": {"title": "Hobbies & Free Time", "jp": "しゅみ", "icon": "🎮", "grammar": ["～ことが好き", "～のが上手", "～たことがある"], "color": "#1a7a7a"}}</script>
+<script>
+// ── DATA ──────────────────────────────────────────────────────
+var EX   = JSON.parse(document.getElementById('d-ex').textContent);
+var META = JSON.parse(document.getElementById('d-meta').textContent);
+var ORDER = ['L1','L2','L3','L4','L5','L6','L7','L8'];
+var PASS  = 80;
+var XP    = {vocab:10,mc:20,fill:20,match:20,listen:20,quiz:50};
+
+// ── STATE ─────────────────────────────────────────────────────
+var user=null, token=null, progress=null;
+var apiUrl = localStorage.getItem('jlpt_api')||'';
+var curLesson=null, curAct=null;
+var exQ=[], exIdx=0, exCorrect=0, exHearts=3, exAnswered=false;
+var mSel=null, mSelEl=null, mMatched=0, mLocked=false;
+
+// ── VOICE ─────────────────────────────────────────────────────
+var jpV=null, enV=null;
+function loadV(){
+  if(!window.speechSynthesis) return;
+  var v=speechSynthesis.getVoices();
+  jpV=v.find(function(x){return x.lang==='ja-JP';})||v.find(function(x){return x.lang.startsWith('ja');})||null;
+  enV=v.find(function(x){return x.lang==='en-US';})||v.find(function(x){return x.lang.startsWith('en');})||null;
+}
+if(window.speechSynthesis){speechSynthesis.onvoiceschanged=loadV;loadV();}
+
+function speakJp(t){
+  if(!window.speechSynthesis||!t) return;
+  speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(t.replace(/・/g,'、').replace(/\//g,'、'));
+  u.lang='ja-JP';u.rate=0.85;if(jpV)u.voice=jpV;
+  speechSynthesis.speak(u);
+}
+function speakEn(t){
+  if(!window.speechSynthesis||!t) return;
+  speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(t);
+  u.lang='en-US';u.rate=0.9;if(enV)u.voice=enV;
+  speechSynthesis.speak(u);
+}
+
+// ── SCREENS ───────────────────────────────────────────────────
+function show(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('screen-'+id).classList.add('active');
+  document.getElementById('top-nav').style.display=(id==='auth')?'none':'flex';
+  window.scrollTo(0,0);
+}
+
+// ── AUTH HELPERS ──────────────────────────────────────────────
+function saveUrl(){apiUrl=document.getElementById('api-url').value.trim();localStorage.setItem('jlpt_api',apiUrl);}
+function switchTab(t){
+  document.getElementById('tab-login-btn').classList.toggle('active',t==='login');
+  document.getElementById('tab-reg-btn').classList.toggle('active',t==='register');
+  document.getElementById('pane-login').style.display=t==='login'?'block':'none';
+  document.getElementById('pane-reg').style.display=t==='register'?'block':'none';
+  setMsg('','');
+}
+function toggleSetup(){var b=document.getElementById('setup-box');b.style.display=b.style.display==='none'?'block':'none';}
+function setMsg(msg,type){var el=document.getElementById('auth-msg');el.textContent=msg;el.className='auth-msg'+(type?' '+type:'');el.style.display=msg?'block':'none';}
+
+// ── API ───────────────────────────────────────────────────────
+function api(params,cb){
+  if(!apiUrl){cb({success:false,error:'Please enter your Apps Script URL first'});return;}
+  var qs=Object.keys(params).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(params[k]);}).join('&');
+  fetch(apiUrl+'?'+qs)
+    .then(function(r){return r.json();})
+    .then(function(d){cb(d);})
+    .catch(function(e){cb({success:false,error:'Network error — check your URL and try again'});});
+}
+
+// ── LOGIN / REGISTER ──────────────────────────────────────────
+function doLogin(){
+  saveUrl();
+  var u=document.getElementById('l-user').value.trim();
+  var p=document.getElementById('l-pass').value;
+  if(!u||!p){setMsg('Please fill in both fields','err');return;}
+  setMsg('Logging in…','');
+  api({action:'login',username:u,password:p},function(d){
+    if(d.success) onAuth(d); else setMsg(d.error||'Login failed','err');
+  });
+}
+function doRegister(){
+  saveUrl();
+  var u=document.getElementById('r-user').value.trim();
+  var p=document.getElementById('r-pass').value;
+  var p2=document.getElementById('r-pass2').value;
+  if(!u||!p||!p2){setMsg('Please fill in all fields','err');return;}
+  if(p!==p2){setMsg('Passwords do not match','err');return;}
+  setMsg('Creating account…','');
+  api({action:'register',username:u,password:p},function(d){
+    if(d.success) onAuth(d); else setMsg(d.error||'Registration failed','err');
+  });
+}
+function onAuth(d){
+  user=d.username; token=d.token; progress=d.progress;
+  localStorage.setItem('jlpt_sess',JSON.stringify({user:user,token:token,apiUrl:apiUrl}));
+  document.getElementById('nav-user').textContent=user;
+  refreshXp();
+  showMap();
+}
+function logout(){
+  user=null;token=null;progress=null;
+  localStorage.removeItem('jlpt_sess');
+  show('auth');
+}
+function saveProgress(){
+  if(!user||!token) return;
+  api({action:'save',username:user,token:token,data:JSON.stringify(progress)},function(){});
+}
+function refreshXp(){
+  if(!progress) return;
+  var xp=progress.totalXP||0;
+  document.getElementById('xp-pill').textContent=xp+' XP';
+  if(document.getElementById('stat-xp')) document.getElementById('stat-xp').textContent=xp;
+  if(document.getElementById('stat-streak')) document.getElementById('stat-streak').textContent=progress.streak||0;
+}
+
+// ── MAP ───────────────────────────────────────────────────────
+function showMap(){renderMap();show('map');}
+function renderMap(){
+  var done=0;
+  document.getElementById('lesson-map').innerHTML=ORDER.map(function(lk,idx){
+    var m=META[lk], pr=progress.lessons[lk]||{unlocked:false,completed:false,bestScore:0};
+    if(pr.completed) done++;
+    var cls=pr.completed?'completed':pr.unlocked?'unlocked':'locked';
+    var st=pr.completed
+      ?'<div class="s-icon">&#9989;</div><div class="s-score">'+pr.bestScore+'%</div>'
+      :pr.unlocked?'<div class="s-icon">&#9654;&#65039;</div>'
+      :'<div class="s-icon">&#128274;</div>';
+    return '<div class="lcard '+cls+'" data-lk="'+lk+'">'+
+      '<div class="l-icon">'+m.icon+'</div>'+
+      '<div class="l-info">'+
+        '<div class="l-num">Lesson '+(idx+1)+' of 8</div>'+
+        '<div class="l-title">'+m.title+'</div>'+
+        '<div class="l-jp">'+m.jp+'</div>'+
+        '<div class="l-tags">'+m.grammar.map(function(g){return '<span class="l-tag">'+g+'</span>';}).join('')+'</div>'+
+      '</div>'+
+      '<div class="l-status">'+st+'</div>'+
+    '</div>';
+  }).join('');
+  document.getElementById('stat-done').textContent=done;
+  refreshXp();
+  // Wire click via delegation (avoids inline onclick string issues)
+  var map=document.getElementById('lesson-map');
+  if(map) map.addEventListener('click',function(ev){
+    var t=ev.target;
+    while(t&&!t.dataset.lk) t=t.parentElement;
+    if(!t||!t.dataset.lk) return;
+    var lk=t.dataset.lk;
+    var pr=progress.lessons[lk]||{};
+    if(pr.unlocked) openLesson(lk);
+  });
+}
+
+// ── LESSON DETAIL ─────────────────────────────────────────────
+function openLesson(lk){
+  curLesson=lk;
+  var m=META[lk], pr=progress.lessons[lk]||{};
+  var ca=pr.completedActivities||[];
+  document.getElementById('d-head').innerHTML=
+    '<div class="d-icon">'+m.icon+'</div>'+
+    '<div class="d-title">'+m.title+'</div>'+
+    '<div class="d-jp">'+m.jp+'</div>'+
+    '<div class="d-tags">'+m.grammar.map(function(g){return '<span class="l-tag">'+g+'</span>';}).join('')+'</div>'+
+    (pr.completed?'<div style="color:#80ff9a;font-weight:bold;margin-top:10px">&#9989; Lesson Complete &nbsp;&#183;&nbsp; Best: '+pr.bestScore+'%</div>':'');
+  var acts=[
+    {id:'vocab', icon:'📖',title:'Vocabulary Preview',   desc:'Learn the key words for this lesson',                xp:10},
+    {id:'mc',    icon:'🔵',title:'Multiple Choice',       desc:'Choose the correct meaning for each word',           xp:20},
+    {id:'fill',  icon:'✏️',title:'Fill in the Blank',     desc:'Complete sentences with the right word in Japanese', xp:20},
+    {id:'match', icon:'🔗',title:'Matching',              desc:'Connect Japanese words to their English meanings',   xp:20},
+    {id:'listen',icon:'🔊',title:'Listening Practice',   desc:'Hear the word spoken — choose the correct meaning',  xp:20},
+    {id:'quiz',  icon:'🏆',title:'Final Quiz',            desc:'15 questions — score 80%+ to complete this lesson', xp:50,final:true},
+  ];
+  document.getElementById('act-list').innerHTML=acts.map(function(a,i){
+    var done=ca.indexOf(a.id)>=0;
+    var locked=i>0&&ca.indexOf(acts[i-1].id)<0;
+    return '<div class="act-card'+(done?' act-done':'')+(locked?' act-locked':'')+'" data-act="'+a.id+'">'+
+      '<div class="act-icon">'+a.icon+'</div>'+
+      '<div class="act-body">'+
+        '<div class="act-title">'+a.title+(a.final?' &#11088;':'')+'</div>'+
+        '<div class="act-desc">'+a.desc+' &nbsp;&#183;&nbsp; +'+a.xp+' XP</div>'+
+      '</div>'+
+      (done?'<div class="act-check">&#10003;</div>':'')+
+    '</div>';
+  }).join('');
+  show('detail');
+  // Event delegation for activity cards
+  setTimeout(function(){
+    var al=document.getElementById('act-list');
+    if(al) al.addEventListener('click',function(ev){
+      var t=ev.target;
+      while(t&&!t.dataset.act) t=t.parentElement;
+      if(!t||!t.dataset.act) return;
+      var pr=progress.lessons[curLesson]||{};
+      var ca=pr.completedActivities||[];
+      var acts=['vocab','mc','fill','match','listen','quiz'];
+      var idx2=acts.indexOf(t.dataset.act);
+      var locked2=idx2>0&&ca.indexOf(acts[idx2-1])<0;
+      if(!locked2) startAct(t.dataset.act);
+    });
+  },50);
+}
+
+// ── EXERCISE ENGINE ───────────────────────────────────────────
+function startAct(actId){
+  curAct=actId;
+  exIdx=0; exCorrect=0; exHearts=(actId==='quiz'?5:3); exAnswered=false;
+  mSel=null; mSelEl=null; mMatched=0; mLocked=false;
+  var ex=EX[curLesson];
+  exQ=buildQ(actId,ex);
+  if(!exQ||!exQ.length){alert('No exercises for this activity yet.');return;}
+  renderEx();
+  show('exercise');
+}
+
+function confirmExit(){if(confirm('Exit this activity?')) openLesson(curLesson);}
+
+function buildQ(actId,ex){
+  if(actId==='vocab')  return buildVocab(ex);
+  if(actId==='mc')     return buildMc(ex);
+  if(actId==='fill')   return buildFill(ex);
+  if(actId==='match')  return [buildMatch(ex)];
+  if(actId==='listen') return buildListen(ex);
+  if(actId==='quiz')   return buildQuiz(ex);
+  return [];
+}
+
+function renderEx(){
+  updateTopbar();
+  var q=exQ[exIdx];
+  if(!q) return;
+  document.getElementById('ex-content').innerHTML=q.html();
+  if(q.init) q.init();
+  // Wire common interactive elements
+  var sb=document.getElementById('sp-btn');
+  if(sb) sb.addEventListener('click',function(){
+    if(window._speakJpFlag) speakJp(window._speakText||'');
+    else speakEn(window._speakText||'');
+    sb.classList.add('playing');
+    setTimeout(function(){sb.classList.remove('playing');},2000);
+  });
+  document.querySelectorAll('.opt').forEach(function(b){
+    b.addEventListener('click',function(){pickOpt(b,b.dataset.val);});
+  });
+}
+function updateTopbar(){
+  var tot=exQ.length;
+  document.getElementById('ex-fill').style.width=Math.round((exIdx/tot)*100)+'%';
+  document.getElementById('ex-cnt').textContent=exIdx+'/'+tot;
+  var max=curAct==='quiz'?5:3;
+  document.getElementById('ex-hearts').innerHTML=
+    Array(exHearts).fill('&#10084;&#65039;').join('')+Array(Math.max(0,max-exHearts)).fill('&#129408;').join('');
+}
+
+function advance(wasCorrect){
+  if(wasCorrect) exCorrect++;
+  else {exHearts--;if(exHearts<=0){finish();return;}}
+  exIdx++;
+  if(exIdx>=exQ.length){finish();return;}
+  exAnswered=false;
+  setTimeout(renderEx,550);
+}
+
+function finish(){
+  var tot=exQ.length;
+  var score=tot>0?Math.round((exCorrect/tot)*100):0;
+  var passed=(curAct!=='quiz')||score>=PASS;
+  // Update progress
+  var pr=progress.lessons[curLesson];
+  var ca=pr.completedActivities||[];
+  if(passed&&ca.indexOf(curAct)<0){
+    ca.push(curAct);
+    pr.completedActivities=ca;
+    progress.totalXP=(progress.totalXP||0)+XP[curAct];
+  }
+  if(curAct==='quiz'&&passed){
+    if(!pr.completed){
+      pr.completed=true; pr.bestScore=score;
+      var nx=ORDER.indexOf(curLesson)+1;
+      if(nx<ORDER.length) progress.lessons[ORDER[nx]].unlocked=true;
+    } else if(score>pr.bestScore) pr.bestScore=score;
+  }
+  saveProgress();
+  showResults(score,passed,exCorrect,tot);
+}
+
+function showResults(score,passed,correct,tot){
+  var isFinal=curAct==='quiz';
+  var emoji=passed?(score>=90?'&#127942;':score>=80?'&#127881;':'&#128077;'):'&#128218;';
+  var title=passed?(isFinal&&score>=90?'Perfect!':isFinal?'Lesson Complete!':'Activity Done!'):'Keep Practising';
+  var unlockHtml='';
+  if(isFinal&&passed){
+    var nx=ORDER.indexOf(curLesson)+1;
+    if(nx<ORDER.length) unlockHtml='<div class="unlock-box">&#128275; Unlocked: Lesson '+(nx+1)+' &mdash; '+META[ORDER[nx]].title+'!</div>';
+  }
+  document.getElementById('res-content').innerHTML=
+    '<div class="res-card">'+
+      '<div class="res-emoji">'+emoji+'</div>'+
+      '<div class="res-title">'+title+'</div>'+
+      '<div class="res-score">'+score+'<span class="res-pct">%</span></div>'+
+      '<div class="res-stats">'+
+        '<div class="rs"><div class="n" style="color:#7de89a">'+correct+'</div><div class="l">Correct</div></div>'+
+        '<div class="rs"><div class="n" style="color:#ff8080">'+(tot-correct)+'</div><div class="l">Missed</div></div>'+
+        '<div class="rs"><div class="n" style="color:var(--gold)">+'+(passed?XP[curAct]:0)+'</div><div class="l">XP earned</div></div>'+
+      '</div>'+
+      unlockHtml+
+      (isFinal&&!passed?'<div class="retry-note">Score '+PASS+'%+ to unlock the next lesson. You got '+score+'%.</div>':'')+
+      '<div class="res-btns">'+
+        '<button class="btn-primary" style="min-width:130px" id="res-back-btn">Back to Lesson</button>'+
+        (isFinal&&!passed?'<button class="btn-ol" id="retry-btn">Try Again</button>':'')+
+        '<button class="btn-ol" id="res-map-btn">Lesson Map</button>'+
+      '</div>'+
+    '</div>';
+  show('results');
+  refreshXp();
+  // Wire result screen buttons
+  setTimeout(function(){
+    var rb=document.getElementById('res-back-btn'); if(rb) rb.addEventListener('click',function(){openLesson(curLesson);});
+    var mb=document.getElementById('res-map-btn'); if(mb) mb.addEventListener('click',showMap);
+    var rt=document.getElementById('retry-btn'); if(rt) rt.addEventListener('click',function(){startAct('quiz');});
+  },50);
+}
+
+// ── QUESTION BUILDERS ─────────────────────────────────────────
+
+// Shared MC answer handler
+window._mcAnswer=null;
+window.pickOpt=function(el,chosen){
+  if(exAnswered) return;
+  exAnswered=true;
+  var correct=chosen===window._mcAnswer;
+  document.querySelectorAll('.opt').forEach(function(b){
+    b.classList.add('answered');
+    if(b.dataset.val===window._mcAnswer) b.classList.add('correct');
+    else if(b===el&&!correct) b.classList.add('wrong');
+  });
+  var fb=document.getElementById('fb');
+  if(fb){
+    fb.style.display='flex';
+    fb.className='fb '+(correct?'ok':'no');
+    fb.innerHTML='<div class="fb-icon">'+(correct?'&#9989;':'&#10060;')+'</div>'+
+      '<div class="fb-text"><strong>'+(correct?'Correct!':'Incorrect')+'</strong>'+
+      (correct?'Great job!':'Answer: '+window._mcAnswer)+'</div>';
+  }
+  setTimeout(function(){advance(correct);},1400);
+};
+window.playSpeakBtn=function(text,isJp){
+  if(isJp) speakJp(text); else speakEn(text);
+  var b=document.getElementById('sp-btn');
+  if(b){b.classList.add('playing');setTimeout(function(){if(b)b.classList.remove('playing');},2000);}
+};
+
+function mcHTML(label,qHTML,speakText,speakJpFlag,options,answer){
+  window._mcAnswer=answer;
+  var speakBtn=speakText?'<button class="speak-btn" id="sp-btn">&#128266; Hear it</button>':'';
+  window._speakText=speakText; window._speakJpFlag=speakJpFlag;
+  var html='<div class="ex-card">'+
+    '<div class="ex-lbl">'+label+'</div>'+
+    qHTML+speakBtn+
+    '<div class="opts">'+options.map(function(o){
+      return '<div class="opt" data-val="'+o.replace(/"/g,'&quot;')+'">'+o+'</div>';
+    }).join('')+
+    '</div>'+
+    '<div id="fb" style="display:none"></div>'+
+  '</div>';
+  return html;
+}
+
+function buildVocab(ex){
+  return ex.mc.slice(0,8).map(function(q){
+    return {
+      html:function(){
+        return '<div class="ex-card">'+
+          '<div class="ex-lbl">Vocabulary Preview</div>'+
+          '<div class="ex-q" style="font-size:2.5rem">'+q.q+'</div>'+
+          '<div class="ex-hint">'+q.hint+'</div>'+
+          '<button class="speak-btn" id="sp-btn">&#128266; Hear it</button>'+
+          '<div id="vrev" style="display:none;font-size:1.4rem;color:#7de89a;font-weight:bold;margin:12px 0">'+q.answer+'</div>'+
+          '<div class="opts" style="margin-top:10px">'+
+            '<div class="opt" id="vshow" onclick="showVocabAnswer()">&#128065; Reveal meaning</div>'+
+            '<div class="opt" id="vnext" style="display:none" onclick="advance(true)">Next &#8594;</div>'+
+          '</div>'+
+        '</div>';
+      },
+      init:function(){
+        window.showVocabAnswer=function(){
+          speakJp(q.q);
+          var r=document.getElementById('vrev');
+          var n=document.getElementById('vnext');
+          var s=document.getElementById('vshow');
+          if(r)r.style.display='block';
+          if(n)n.style.display='block';
+          if(s)s.style.display='none';
+        };
+      }
+    };
+  });
+}
+
+function buildMc(ex){
+  return ex.mc.map(function(q){
+    return {html:function(){return mcHTML('Multiple Choice — What does this mean?','<div class="ex-q">'+q.q+'</div><div class="ex-hint">'+q.hint+'</div>',q.q,true,q.options,q.answer);}};
+  });
+}
+
+function buildFill(ex){
+  return ex.fill.map(function(q){
+    return {
+      html:function(){
+        return '<div class="ex-card">'+
+          '<div class="ex-lbl">Fill in the Blank</div>'+
+          '<div class="fill-sent" style="color:var(--muted);font-size:1rem;margin-bottom:10px">'+q.sentence_en+'</div>'+
+          '<div class="fill-sent">'+q.sentence_jp+'</div>'+
+          '<input class="fill-inp" id="fill-in" type="text" placeholder="Type the Japanese word..." autocomplete="off" autocorrect="off" autocapitalize="off">'+
+          '<button class="btn-check" id="fill-btn" onclick="checkFill()">Check &#8594;</button>'+
+          '<div id="fb" style="display:none"></div>'+
+        '</div>';
+      },
+      init:function(){
+        window._fillAns=q.answer; window._fillHint=q.hint;
+        window.checkFill=function(){
+          if(exAnswered) return;
+          var inp=document.getElementById('fill-in');
+          var val=inp?inp.value.trim():'';
+          if(!val) return;
+          exAnswered=true;
+          var correct=val===window._fillAns;
+          if(inp) inp.classList.add(correct?'correct':'wrong');
+          var fb=document.getElementById('fb');
+          if(fb){
+            fb.style.display='flex';fb.className='fb '+(correct?'ok':'no');
+            fb.innerHTML='<div class="fb-icon">'+(correct?'&#9989;':'&#10060;')+'</div>'+
+              '<div class="fb-text"><strong>'+(correct?'Correct!':'Incorrect')+'</strong>'+
+              (correct?'Well done!':'Answer: '+window._fillAns+' ('+window._fillHint+')')+'</div>';
+          }
+          var btn=document.getElementById('fill-btn');
+          if(btn){btn.textContent='Next →';btn.onclick=function(){advance(correct);};}
+        };
+        var inp=document.getElementById('fill-in');
+        if(inp) inp.addEventListener('keydown',function(e){if(e.key==='Enter')window.checkFill();});
+      }
+    };
+  });
+}
+
+function buildMatch(ex){
+  var pairs=ex.match.slice(0,8);
+  var lefts=shuffle(pairs.map(function(p){return {text:p.jp,pair:p.jp,side:'jp'};}));
+  var rights=shuffle(pairs.map(function(p){return {text:p.en,pair:p.jp,side:'en'};}));
+  return {
+    html:function(){
+      return '<div class="ex-card" style="padding:18px">'+
+        '<div class="ex-lbl">Matching — Connect each Japanese word to its meaning</div>'+
+        '<div class="match-grid">'+
+          '<div class="match-col" id="m-left">'+lefts.map(function(it,i){return '<div class="m-item" id="ml'+i+'" data-pair="'+it.pair+'" data-side="jp" onclick="mClick(this)">'+it.text+'</div>';}).join('')+'</div>'+
+          '<div class="match-col" id="m-right">'+rights.map(function(it,i){return '<div class="m-item" id="mr'+i+'" data-pair="'+it.pair+'" data-side="en" onclick="mClick(this)">'+it.text+'</div>';}).join('')+'</div>'+
+        '</div>'+
+        '<div class="match-prog" id="m-prog">0 / '+pairs.length+' matched</div>'+
+      '</div>';
+    },
+    init:function(){
+      mSel=null;mSelEl=null;mMatched=0;mLocked=false;
+      window.mClick=function(el){
+        if(mLocked||el.classList.contains('matched')) return;
+        if(mSelEl===el){el.classList.remove('sel');mSel=null;mSelEl=null;return;}
+        if(mSelEl&&mSel.side===el.dataset.side){mSelEl.classList.remove('sel');}
+        if(mSelEl&&mSel.side!==el.dataset.side){
+          if(mSel.pair===el.dataset.pair){
+            el.classList.add('matched');mSelEl.classList.remove('sel');mSelEl.classList.add('matched');
+            speakJp(el.dataset.pair||mSel.pair);
+            mMatched++;
+            var mp=document.getElementById('m-prog');if(mp)mp.textContent=mMatched+' / '+pairs.length+' matched';
+            mSel=null;mSelEl=null;
+            if(mMatched>=pairs.length){exCorrect=pairs.length;setTimeout(finish,600);}
+          } else {
+            mLocked=true;
+            el.classList.add('bad');mSelEl.classList.add('bad');
+            exHearts=Math.max(0,exHearts-1);updateTopbar();
+            var e2=el,s2=mSelEl;
+            setTimeout(function(){e2.classList.remove('bad','sel');s2.classList.remove('bad','sel');mSel=null;mSelEl=null;mLocked=false;},650);
+          }
+          return;
+        }
+        el.classList.add('sel');mSel={pair:el.dataset.pair,side:el.dataset.side};mSelEl=el;
+      };
+    }
+  };
+}
+
+function buildListen(ex){
+  return ex.listen.map(function(q){
+    return {html:function(){
+      return mcHTML(
+        'Listening — What did you hear?',
+        '<div style="margin:14px 0"><button class="speak-btn" style="font-size:1.05rem;padding:12px 24px" id="sp-btn">&#128266; Play</button></div>'+
+        '<div style="color:var(--muted);font-size:.8rem;margin-bottom:6px">Listen carefully and choose the correct meaning</div>',
+        q.speak,true,q.options,q.answer
+      );
+    }};
+  });
+}
+
+function buildQuiz(ex){
+  return shuffle(ex.quiz.slice()).map(function(q){
+    if(q.type==='mc_rev'){
+      return {html:function(){return mcHTML('Final Quiz — Choose the Japanese','<div class="ex-q sm">'+q.q+'</div>',null,false,q.options,q.answer);}};
+    }
+    return {html:function(){
+      return mcHTML('Final Quiz — What does this mean?','<div class="ex-q">'+q.q+'</div>',q.q,true,q.options,q.answer);
+    }};
+  });
+}
+
+// ── UTILS ─────────────────────────────────────────────────────
+function shuffle(a){
+  a=a.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+(function(){
+  apiUrl=localStorage.getItem('jlpt_api')||'';
+  if(apiUrl) document.getElementById('api-url').value=apiUrl;
+  var sess=localStorage.getItem('jlpt_sess');
+  if(!sess) return;
+  try {
+    var s=JSON.parse(sess);
+    if(s.apiUrl){apiUrl=s.apiUrl;document.getElementById('api-url').value=apiUrl;}
+    setMsg('Restoring session…','');
+    api({action:'progress',username:s.user,token:s.token},function(d){
+      if(d.success){
+        user=s.user;token=s.token;progress=d.progress;
+        document.getElementById('nav-user').textContent=user;
+        refreshXp();showMap();
+      } else {
+        localStorage.removeItem('jlpt_sess');setMsg('','');
+      }
+    });
+  } catch(e){localStorage.removeItem('jlpt_sess');}
+})();
+</script>
+</body>
+</html>
