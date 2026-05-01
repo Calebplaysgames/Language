@@ -281,11 +281,13 @@ var KANA_ACTIVITIES=[
   {id:'hira_mc',       icon:'🔵',title:'Hiragana Recognition',       desc:'See hiragana in order, choose the reading — 100% required', part:1,needs100:true, isQuiz:false,isFinal:false},
   {id:'hira_mc_shuf',  icon:'🔀',title:'Hiragana Recognition (Shuffled)', desc:'Same quiz shuffled randomly — 100% required',          part:1,needs100:true, isQuiz:false,isFinal:false},
   {id:'hira_listen',   icon:'🔊',title:'Hiragana Listening',         desc:'Hear the sound, choose the hiragana — 100% required',       part:1,needs100:true, isQuiz:false,isFinal:false},
+  {id:'hira_lis_shuf', icon:'🔀',title:'Hiragana Listening (Shuffled)', desc:'Same listening quiz shuffled randomly — 100% required',      part:1,needs100:true, isQuiz:false,isFinal:false},
   // Part 2: Katakana
   {id:'kata_preview',  icon:'📖',title:'Katakana Preview',           desc:'See and hear all katakana in order',                        part:2,needs100:false,isQuiz:false,isFinal:false},
   {id:'kata_mc',       icon:'🔵',title:'Katakana Recognition',       desc:'See katakana in order, choose the reading — 100% required', part:2,needs100:true, isQuiz:false,isFinal:false},
   {id:'kata_mc_shuf',  icon:'🔀',title:'Katakana Recognition (Shuffled)', desc:'Same quiz shuffled randomly — 100% required',         part:2,needs100:true, isQuiz:false,isFinal:false},
   {id:'kata_listen',   icon:'🔊',title:'Katakana Listening',         desc:'Hear the sound, choose the katakana — 100% required',       part:2,needs100:true, isQuiz:false,isFinal:false},
+  {id:'kata_lis_shuf', icon:'🔀',title:'Katakana Listening (Shuffled)', desc:'Same listening quiz shuffled randomly — 100% required',      part:2,needs100:true, isQuiz:false,isFinal:false},
   // Part 3: Final
   {id:'kana_quiz',     icon:'🏆',title:'Kana Final Quiz',            desc:'Mixed hiragana + katakana shuffled — 80%+ to unlock Lesson 1', part:3,needs100:false,isQuiz:true,isFinal:true},
 ];
@@ -531,11 +533,13 @@ function buildQ(id,ex){
   if(id==='hira_preview') return buildKanaPreview(ex.hiragana_basic,'Hiragana');
   if(id==='hira_mc')      return buildKanaMc(ex.hira_mc,'Hiragana Recognition',false);
   if(id==='hira_mc_shuf') return buildKanaMc(shuffle(ex.hira_mc.slice()),'Hiragana Recognition (Shuffled)',false);
-  if(id==='hira_listen')  return buildKanaListen(ex.hira_listen,'Hiragana Listening');
+  if(id==='hira_listen')   return buildKanaListen(ex.hira_listen,'Hiragana Listening');
+  if(id==='hira_lis_shuf') return buildKanaListen(shuffle(ex.hira_listen.slice()),'Hiragana Listening (Shuffled)');
   if(id==='kata_preview') return buildKanaPreview(ex.katakana_basic,'Katakana');
   if(id==='kata_mc')      return buildKanaMc(ex.kata_mc,'Katakana Recognition',false);
   if(id==='kata_mc_shuf') return buildKanaMc(shuffle(ex.kata_mc.slice()),'Katakana Recognition (Shuffled)',false);
-  if(id==='kata_listen')  return buildKanaListen(ex.kata_listen,'Katakana Listening');
+  if(id==='kata_listen')   return buildKanaListen(ex.kata_listen,'Katakana Listening');
+  if(id==='kata_lis_shuf') return buildKanaListen(shuffle(ex.kata_listen.slice()),'Katakana Listening (Shuffled)');
   if(id==='kana_quiz')    return buildKanaQuiz(ex.kana_quiz);
   return [];
 }
