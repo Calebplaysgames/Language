@@ -276,13 +276,18 @@ var ACTIVITIES=[
 ];
 // Kana-specific activities (used when curLesson === 'KANA')
 var KANA_ACTIVITIES=[
-  {id:'hira_preview', icon:'📖',title:'Hiragana Preview',    desc:'See and hear all hiragana characters',                 part:1,needs100:false,isQuiz:false,isFinal:false},
-  {id:'hira_mc',      icon:'🔵',title:'Hiragana Recognition', desc:'See hiragana, choose the romaji — 100% required',     part:1,needs100:true, isQuiz:false,isFinal:false},
-  {id:'hira_listen',  icon:'🔊',title:'Hiragana Listening',   desc:'Hear the sound, choose the hiragana — 100% required', part:1,needs100:true, isQuiz:false,isFinal:false},
-  {id:'kata_preview', icon:'📖',title:'Katakana Preview',     desc:'See and hear all katakana characters',                part:2,needs100:false,isQuiz:false,isFinal:false},
-  {id:'kata_mc',      icon:'🔵',title:'Katakana Recognition', desc:'See katakana, choose the romaji — 100% required',     part:2,needs100:true, isQuiz:false,isFinal:false},
-  {id:'kata_listen',  icon:'🔊',title:'Katakana Listening',   desc:'Hear the sound, choose the katakana — 100% required', part:2,needs100:true, isQuiz:false,isFinal:false},
-  {id:'kana_quiz',    icon:'🏆',title:'Kana Final Quiz',      desc:'Mixed hiragana + katakana — score 80%+ to unlock Lesson 1', part:2,needs100:false,isQuiz:true,isFinal:true},
+  // Part 1: Hiragana
+  {id:'hira_preview',  icon:'📖',title:'Hiragana Preview',           desc:'See and hear all hiragana in order',                        part:1,needs100:false,isQuiz:false,isFinal:false},
+  {id:'hira_mc',       icon:'🔵',title:'Hiragana Recognition',       desc:'See hiragana in order, choose the reading — 100% required', part:1,needs100:true, isQuiz:false,isFinal:false},
+  {id:'hira_mc_shuf',  icon:'🔀',title:'Hiragana Recognition (Shuffled)', desc:'Same quiz shuffled randomly — 100% required',          part:1,needs100:true, isQuiz:false,isFinal:false},
+  {id:'hira_listen',   icon:'🔊',title:'Hiragana Listening',         desc:'Hear the sound, choose the hiragana — 100% required',       part:1,needs100:true, isQuiz:false,isFinal:false},
+  // Part 2: Katakana
+  {id:'kata_preview',  icon:'📖',title:'Katakana Preview',           desc:'See and hear all katakana in order',                        part:2,needs100:false,isQuiz:false,isFinal:false},
+  {id:'kata_mc',       icon:'🔵',title:'Katakana Recognition',       desc:'See katakana in order, choose the reading — 100% required', part:2,needs100:true, isQuiz:false,isFinal:false},
+  {id:'kata_mc_shuf',  icon:'🔀',title:'Katakana Recognition (Shuffled)', desc:'Same quiz shuffled randomly — 100% required',         part:2,needs100:true, isQuiz:false,isFinal:false},
+  {id:'kata_listen',   icon:'🔊',title:'Katakana Listening',         desc:'Hear the sound, choose the katakana — 100% required',       part:2,needs100:true, isQuiz:false,isFinal:false},
+  // Part 3: Final
+  {id:'kana_quiz',     icon:'🏆',title:'Kana Final Quiz',            desc:'Mixed hiragana + katakana shuffled — 80%+ to unlock Lesson 1', part:3,needs100:false,isQuiz:true,isFinal:true},
 ];
 function getActivities(){ return curLesson==='KANA' ? KANA_ACTIVITIES : ACTIVITIES; }
 var user=null,token=null,progress=null;
@@ -485,7 +490,7 @@ function openLesson(lk){
     var done=ca.indexOf(a.id)>=0;
     var prevDone=i===0||ca.indexOf(getActivities()[i-1].id)>=0;
     var locked=!prevDone;
-    if(a.part!==lastPart){lastPart=a.part;h+='<div class="part-label">'+(a.part===1?'&#9312; Part 1 \u2014 Vocabulary':'&#9313; Part 2 \u2014 Grammar')+'</div>';}
+    if(a.part!==lastPart){lastPart=a.part;h+='<div class="part-label">'+(curLesson==='KANA'?(a.part===1?'&#9312; Part 1 — Hiragana':a.part===2?'&#9313; Part 2 — Katakana':'&#9314; Part 3 — Final Quiz'):(a.part===1?'&#9312; Part 1 — Vocabulary':'&#9313; Part 2 — Grammar'))+'</div>';}
     var badge=a.isQuiz?(a.isFinal?'<span class="act-badge" style="background:rgba(200,168,75,.15);color:var(--gold);border:1px solid rgba(200,168,75,.3)">&#127942; 80%+ unlocks next lesson</span>':'<span class="act-badge" style="background:rgba(200,168,75,.15);color:var(--gold);border:1px solid rgba(200,168,75,.3)">&#11088; 80%+ to continue</span>'):(a.needs100?'<span class="act-badge" style="background:rgba(46,117,182,.12);color:#6aabdd;border:1px solid rgba(46,117,182,.3)">100% required</span>':'<span class="act-badge" style="background:rgba(100,100,100,.12);color:#8899aa;border:1px solid #2a3f5a">Study activity</span>');
     h+='<div class="act-card'+(done?' act-done':'')+(locked?' act-locked':(i===ca.length?' act-current':''))+'" data-act="'+a.id+'"><div class="act-icon">'+a.icon+'</div><div class="act-body"><div class="act-title">'+a.title+'</div><div class="act-desc">'+a.desc+'</div>'+badge+'</div>'+(done?'<div class="act-check">&#10003;</div>':'')+'</div>';
   });
@@ -523,13 +528,15 @@ function buildQ(id,ex){
   if(id==='grammar_mc')return buildGrammarMc(ex);
   if(id==='grammar_quiz')return buildGrammarQuiz(ex);
   // Kana activities
-  if(id==='hira_preview')return buildKanaPreview(ex.hiragana_basic,'Hiragana');
-  if(id==='hira_mc')return buildKanaMc(ex.hira_mc,'Hiragana Recognition');
-  if(id==='hira_listen')return buildKanaListen(ex.hira_listen,'Hiragana Listening');
-  if(id==='kata_preview')return buildKanaPreview(ex.katakana_basic,'Katakana');
-  if(id==='kata_mc')return buildKanaMc(ex.kata_mc,'Katakana Recognition');
-  if(id==='kata_listen')return buildKanaListen(ex.kata_listen,'Katakana Listening');
-  if(id==='kana_quiz')return buildKanaQuiz(ex.kana_quiz);
+  if(id==='hira_preview') return buildKanaPreview(ex.hiragana_basic,'Hiragana');
+  if(id==='hira_mc')      return buildKanaMc(ex.hira_mc,'Hiragana Recognition',false);
+  if(id==='hira_mc_shuf') return buildKanaMc(shuffle(ex.hira_mc.slice()),'Hiragana Recognition (Shuffled)',false);
+  if(id==='hira_listen')  return buildKanaListen(ex.hira_listen,'Hiragana Listening');
+  if(id==='kata_preview') return buildKanaPreview(ex.katakana_basic,'Katakana');
+  if(id==='kata_mc')      return buildKanaMc(ex.kata_mc,'Katakana Recognition',false);
+  if(id==='kata_mc_shuf') return buildKanaMc(shuffle(ex.kata_mc.slice()),'Katakana Recognition (Shuffled)',false);
+  if(id==='kata_listen')  return buildKanaListen(ex.kata_listen,'Katakana Listening');
+  if(id==='kana_quiz')    return buildKanaQuiz(ex.kana_quiz);
   return [];
 }
 function renderEx(){
@@ -748,12 +755,13 @@ function buildKanaPreview(chars, label){
   });
 }
 
-function buildKanaMc(questions, label){
+function buildKanaMc(questions, label, showAudio){
   if(!questions||!questions.length)return[];
+  var hasAudio=(showAudio===true);
   return questions.map(function(q){
     return mcCard(label+' \u2014 What is the reading?',
       '<div class="ex-q" style="font-size:3rem;letter-spacing:2px">'+q.q+'</div>',
-      q.q, true, q.options, q.answer);
+      hasAudio?q.q:null, hasAudio, q.options, q.answer);
   });
 }
 
