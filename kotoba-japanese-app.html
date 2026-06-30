@@ -1,0 +1,3381 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+<title>Kotoba — Japanese Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0f11;
+  --surface: #161719;
+  --surface2: #1e2023;
+  --surface3: #252729;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0f1f3;
+  --text2: #9ca3af;
+  --text3: #6b7280;
+  --red: #e53e3e;
+  --accent: #f97316;
+  --accent-dim: rgba(249,115,22,0.12);
+  --accent-border: rgba(249,115,22,0.3);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --blue: #3b82f6;
+  --blue-dim: rgba(59,130,246,0.12);
+  --purple: #a78bfa;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+[data-theme="light"] {
+  --bg: #f5f5f0;
+  --surface: #ffffff;
+  --surface2: #f0eeea;
+  --surface3: #e8e6e1;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.15);
+  --text: #1a1a1a;
+  --text2: #4b5563;
+  --text3: #9ca3af;
+  --shadow: 0 4px 24px rgba(0,0,0,0.1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  height: 100vh;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────── */
+#sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  transition: width 0.2s, min-width 0.2s;
+  position: relative;
+  z-index: 10;
+}
+#sidebar.collapsed { width: 60px; min-width: 60px; }
+.sidebar-header {
+  padding: 20px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.logo-mark {
+  width: 32px; height: 32px; min-width: 32px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 16px; font-weight: 700;
+  color: #fff;
+}
+.logo-text { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+.logo-text span { color: var(--accent); }
+.sidebar-nav { flex: 1; padding: 8px 8px; overflow-y: auto; overflow-x: hidden; }
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  text-transform: uppercase;
+  padding: 12px 8px 4px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+#sidebar.collapsed .nav-section-label,
+#sidebar.collapsed .nav-label,
+#sidebar.collapsed .logo-text,
+#sidebar.collapsed .sidebar-bottom-label { opacity: 0; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text2);
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background 0.15s, color 0.15s;
+  position: relative;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--accent-dim); color: var(--accent); }
+.nav-item .nav-icon {
+  font-size: 18px; min-width: 20px;
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-badge {
+  margin-left: auto;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 20px;
+}
+.sidebar-bottom {
+  padding: 12px 8px;
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.sidebar-toggle {
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  transform: translateY(-50%);
+  width: 24px; height: 24px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  color: var(--text2);
+  z-index: 20;
+  transition: background 0.15s;
+}
+.sidebar-toggle:hover { background: var(--surface3); color: var(--text); }
+
+/* ── MAIN AREA ───────────────────────────────────────── */
+#main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+#topbar {
+  height: 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.topbar-title { font-size: 15px; font-weight: 600; }
+.topbar-sub { font-size: 13px; color: var(--text2); }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.library-back-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text3);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.library-back-link:hover { background: var(--surface2); color: var(--text2); }
+.topbar-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border2);
+  margin: 0 4px;
+}
+.icon-btn {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  transition: background 0.15s, color 0.15s;
+}
+.icon-btn:hover { background: var(--surface2); color: var(--text); }
+.icon-btn.active { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent); }
+#content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+/* ── SCREENS ─────────────────────────────────────────── */
+.screen { display: none; flex: 1; overflow-y: auto; padding: 28px 32px; }
+.screen.active { display: block; }
+.screen-flex { display: none; flex: 1; overflow: hidden; }
+.screen-flex.active { display: flex; }
+
+/* ── DASHBOARD ───────────────────────────────────────── */
+.dash-hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.dash-hero-jp {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 52px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  min-width: 80px;
+}
+.dash-hero-text h2 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+.dash-hero-text p { color: var(--text2); font-size: 14px; line-height: 1.6; }
+.streak-badge {
+  margin-left: auto;
+  display: flex; flex-direction: column; align-items: center;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  min-width: 80px;
+}
+.streak-num { font-size: 32px; font-weight: 700; color: var(--accent); line-height: 1; }
+.streak-label { font-size: 11px; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+}
+.stat-card .s-val { font-size: 26px; font-weight: 600; color: var(--text); }
+.stat-card .s-label { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.stat-card .s-icon { font-size: 20px; margin-bottom: 6px; }
+
+.section-hd {
+  font-size: 14px; font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+.course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.course-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.12s;
+  position: relative;
+  overflow: hidden;
+}
+.course-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+.course-card.locked { opacity: 0.55; cursor: not-allowed; }
+.course-card .c-level {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.course-card .c-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.course-card .c-sub { font-size: 12px; color: var(--text2); margin-bottom: 12px; }
+.progress-bar-wrap { height: 4px; background: var(--surface3); border-radius: 4px; }
+.progress-bar-fill { height: 4px; border-radius: 4px; background: var(--accent); transition: width 0.4s; }
+.course-card .c-prog { font-size: 11px; color: var(--text2); margin-top: 4px; }
+.course-card .lock-icon { position: absolute; top: 14px; right: 14px; font-size: 16px; color: var(--text3); }
+.level-n5 .c-level { color: #22c55e; }
+.level-n4 .c-level { color: #3b82f6; }
+.level-n3 .c-level { color: #a78bfa; }
+.level-n2 .c-level { color: var(--accent); }
+.level-n1 .c-level { color: #ef4444; }
+
+/* ── LESSON LIST ─────────────────────────────────────── */
+.lesson-back {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text2);
+  cursor: pointer;
+  margin-bottom: 20px;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.lesson-back:hover { background: var(--surface2); color: var(--text); }
+.lesson-list { display: flex; flex-direction: column; gap: 8px; }
+.lesson-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.lesson-row:hover { border-color: var(--border2); }
+.lesson-row.locked { opacity: 0.5; cursor: not-allowed; }
+.lesson-row.completed { border-left: 3px solid var(--green); }
+.lesson-row.current { border-left: 3px solid var(--accent); }
+.lesson-num {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600;
+  color: var(--text2);
+  flex-shrink: 0;
+}
+.lesson-row.completed .lesson-num { background: var(--green-dim); color: var(--green); }
+.lesson-row.current .lesson-num { background: var(--accent-dim); color: var(--accent); }
+.lesson-info { flex: 1; }
+.lesson-info .l-title { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+.lesson-info .l-sub { font-size: 12px; color: var(--text2); }
+.lesson-meta { display: flex; align-items: center; gap: 8px; }
+.lesson-tag {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: var(--surface2);
+  color: var(--text2);
+}
+.lesson-xp { font-size: 12px; color: var(--text3); }
+
+/* ── LESSON ENGINE ───────────────────────────────────── */
+#lesson-screen {
+  flex: 1;
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+#lesson-screen.active { display: flex; }
+.lesson-topbar {
+  height: 52px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.lesson-progress-track {
+  flex: 1;
+  height: 6px;
+  background: var(--surface3);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.lesson-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 6px;
+  transition: width 0.4s ease;
+}
+.lesson-hearts { display: flex; gap: 4px; }
+.heart { font-size: 18px; transition: transform 0.2s; }
+.heart.lost { opacity: 0.2; transform: scale(0.8); }
+.lesson-xp-counter {
+  font-size: 13px; font-weight: 600;
+  color: var(--accent);
+  display: flex; align-items: center; gap: 4px;
+}
+
+.lesson-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  overflow-y: auto;
+}
+.question-card {
+  width: 100%;
+  max-width: 680px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+.q-type-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  align-self: flex-start;
+}
+.q-main {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2;
+}
+.q-main.small { font-size: 24px; }
+.q-main.roman { font-family: 'Inter', sans-serif; font-size: 28px; }
+.q-prompt { font-size: 15px; color: var(--text2); text-align: center; }
+.q-furigana {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  color: var(--text3);
+  text-align: center;
+}
+
+/* Answer options */
+.answer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+.answer-btn {
+  background: var(--surface2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  cursor: pointer;
+  font-size: 18px;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--text);
+  text-align: center;
+  transition: border-color 0.12s, background 0.12s, transform 0.1s;
+  position: relative;
+  min-height: 60px;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+}
+.answer-btn .a-sub { font-size: 12px; color: var(--text2); font-family: 'Inter', sans-serif; }
+.answer-btn:hover:not(:disabled) { border-color: var(--border2); background: var(--surface3); transform: translateY(-1px); }
+.answer-btn.correct { border-color: var(--green); background: var(--green-dim); }
+.answer-btn.wrong { border-color: var(--red); background: rgba(229,62,62,0.12); }
+.answer-btn.reveal { border-color: var(--blue); background: var(--blue-dim); }
+.answer-btn:disabled { cursor: default; }
+
+/* Type input */
+.type-input-wrap { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.type-input {
+  width: 100%; max-width: 400px;
+  padding: 14px 18px;
+  background: var(--surface2);
+  border: 2px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 20px;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--text);
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.type-input:focus { border-color: var(--accent); }
+.type-input.correct { border-color: var(--green); background: var(--green-dim); }
+.type-input.wrong { border-color: var(--red); background: rgba(229,62,62,0.12); }
+
+/* Feedback bar */
+.feedback-bar {
+  width: 100%;
+  padding: 18px 32px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 16px;
+  flex-shrink: 0;
+  transform: translateY(100%);
+  transition: transform 0.25s ease;
+  position: relative;
+  z-index: 60;
+}
+.feedback-bar.show { transform: translateY(0); }
+.feedback-bar.correct-fb { background: var(--green-dim); border-top-color: rgba(34,197,94,0.25); }
+.feedback-bar.wrong-fb { background: rgba(229,62,62,0.1); border-top-color: rgba(229,62,62,0.25); }
+.fb-icon { font-size: 24px; }
+.fb-text { flex: 1; }
+.fb-text .fb-title { font-size: 15px; font-weight: 600; }
+.fb-text .fb-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+.fb-btn {
+  padding: 10px 28px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.fb-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.fb-btn.continue-correct { background: var(--green); color: #fff; }
+.fb-btn.continue-wrong { background: var(--red); color: #fff; }
+
+/* Drawing tablet */
+.tablet-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 20px 24px;
+  gap: 12px;
+  z-index: 50;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+.tablet-overlay.visible { transform: translateY(0); }
+.tablet-header {
+  width: 100%; display: flex; align-items: center;
+  justify-content: space-between;
+}
+.tablet-title { font-size: 13px; font-weight: 600; color: var(--text2); }
+.tablet-tools { display: flex; gap: 8px; }
+.t-tool-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text2);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.t-tool-btn:hover { background: var(--surface2); color: var(--text); }
+.t-tool-btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+#draw-canvas {
+  border-radius: var(--radius);
+  border: 2px solid var(--border2);
+  cursor: crosshair;
+  background: #fff;
+  touch-action: none;
+}
+.tablet-result {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: var(--text2);
+  min-height: 24px;
+}
+.tablet-result .tr-match {
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+.tablet-result .tr-match.good { background: var(--green-dim); color: var(--green); }
+.tablet-result .tr-match.poor { background: rgba(229,62,62,0.12); color: var(--red); }
+
+/* ── VOCABULARY SCREEN ───────────────────────────────── */
+.vocab-filters {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.filter-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  font-size: 13px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text2);
+  transition: background 0.12s, color 0.12s;
+}
+.filter-chip:hover, .filter-chip.active {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+.search-input {
+  padding: 8px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  width: 220px;
+  margin-left: auto;
+}
+.search-input:focus { border-color: var(--accent); }
+.vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.vocab-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.12s;
+}
+.vocab-card:hover { border-color: var(--border2); }
+.vocab-card .v-jp {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 24px; font-weight: 700;
+  margin-bottom: 2px;
+}
+.vocab-card .v-reading {
+  font-size: 12px; color: var(--text3);
+  margin-bottom: 6px;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.vocab-card .v-en { font-size: 13px; color: var(--text2); }
+.vocab-card .v-level {
+  margin-top: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+/* ── HIRAGANA / KATAKANA CHART ───────────────────────── */
+.kana-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.kana-cell {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+.kana-cell:hover { border-color: var(--border2); background: var(--surface2); }
+.kana-cell .k-char {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 22px; font-weight: 500;
+  display: block;
+}
+.kana-cell .k-rom { font-size: 11px; color: var(--text3); margin-top: 2px; display: block; }
+
+/* ── RESULTS SCREEN ──────────────────────────────────── */
+.result-screen {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 40px 20px;
+}
+.result-icon { font-size: 64px; margin-bottom: 16px; }
+.result-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.result-sub { font-size: 15px; color: var(--text2); margin-bottom: 32px; }
+.result-stats { display: flex; justify-content: center; gap: 32px; margin-bottom: 32px; }
+.r-stat { text-align: center; }
+.r-stat .r-val { font-size: 32px; font-weight: 700; }
+.r-stat .r-label { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; }
+.result-xp-bar {
+  width: 100%; height: 8px;
+  background: var(--surface3);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.result-xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  border-radius: 8px;
+  transition: width 1s ease;
+}
+
+/* ── TABLET TOGGLE MODES ─────────────────────────────── */
+.tablet-mode-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text2);
+}
+.toggle-switch {
+  width: 40px; height: 22px;
+  background: var(--surface3);
+  border-radius: 11px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: 1px solid var(--border2);
+}
+.toggle-switch.on { background: var(--accent); border-color: var(--accent); }
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  left: 2px; top: 2px;
+  width: 16px; height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+.toggle-switch.on::after { transform: translateX(18px); }
+
+/* ── SETTINGS PANEL ──────────────────────────────────── */
+.settings-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+.settings-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row label { font-size: 14px; }
+.settings-row .s-hint { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+/* ── SCROLLBAR ───────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+/* ── TOOLTIP ─────────────────────────────────────────── */
+.tooltip { position: relative; }
+.tooltip::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%; transform: translateX(-50%);
+  bottom: calc(100% + 6px);
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.tooltip:hover::after { opacity: 1; }
+
+/* ── MODAL ───────────────────────────────────────────── */
+#modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 100;
+  align-items: center; justify-content: center;
+}
+#modal-overlay.show { display: flex; }
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: var(--shadow);
+}
+.modal-box h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.modal-box p { font-size: 14px; color: var(--text2); margin-bottom: 20px; line-height: 1.6; }
+.modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+.btn {
+  padding: 9px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text);
+  transition: background 0.12s;
+}
+.btn:hover { background: var(--surface2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { opacity: 0.9; }
+
+/* ── LEVEL XP BAR ────────────────────────────────────── */
+.xp-bar-wrap {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+}
+.xp-level-badge {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--accent);
+}
+.xp-track { flex: 1; height: 4px; background: var(--surface3); border-radius: 4px; overflow: hidden; }
+.xp-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.5s; }
+.xp-label { font-size: 11px; color: var(--text3); min-width: 60px; text-align: right; }
+
+/* ── WORD BANK ───────────────────────────────────────── */
+.wb-answer-tray {
+  width: 100%;
+  min-height: 56px;
+  border: 2px dashed var(--border2);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  background: var(--surface2);
+  transition: border-color 0.15s;
+  position: relative;
+}
+.wb-answer-tray.correct-tray { border-color: var(--green); border-style: solid; background: var(--green-dim); }
+.wb-answer-tray.wrong-tray { border-color: var(--red); border-style: solid; background: rgba(229,62,62,0.08); }
+.wb-placeholder {
+  font-size: 13px;
+  color: var(--text3);
+  position: absolute;
+  pointer-events: none;
+}
+.wb-bank {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  min-height: 44px;
+  padding: 4px 0;
+}
+.wb-chip {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 16px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 2px solid var(--border2);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, transform 0.1s, opacity 0.15s;
+  user-select: none;
+  white-space: nowrap;
+}
+.wb-chip:hover:not(.used):not(:disabled) {
+  border-color: var(--accent-border);
+  background: var(--accent-dim);
+  transform: translateY(-2px);
+}
+.wb-chip.in-tray {
+  border-color: var(--accent-border);
+  background: var(--accent-dim);
+  color: var(--text);
+}
+.wb-chip.in-tray:hover { border-color: var(--border2); background: var(--surface2); transform: none; }
+.wb-chip.used { opacity: 0; pointer-events: none; cursor: default; }
+.wb-chip.shake { animation: wb-shake 0.35s ease; }
+@keyframes wb-shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  60% { transform: translateX(5px); }
+  80% { transform: translateX(-3px); }
+}
+.wb-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+.wb-check-row {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+/* ── MATCHING ACTIVITY ───────────────────────────────── */
+.match-columns {
+  display: flex;
+  gap: 32px;
+  width: 100%;
+  justify-content: center;
+}
+.match-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 110px;
+}
+.match-col-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text3);
+  text-align: center;
+  margin-bottom: 4px;
+}
+.match-item {
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  border: 2px solid var(--border2);
+  background: var(--surface2);
+  cursor: pointer;
+  text-align: center;
+  font-size: 18px;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: border-color 0.12s, background 0.12s, transform 0.1s, opacity 0.2s;
+  user-select: none;
+}
+.match-item.right-col { font-family: 'Inter', sans-serif; font-size: 15px; }
+.match-item:hover:not(.matched):not(.disabled) {
+  border-color: var(--accent-border);
+  background: var(--accent-dim);
+  transform: translateY(-1px);
+}
+.match-item.selected {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  box-shadow: 0 0 0 2px var(--accent-border);
+}
+.match-item.matched {
+  border-color: var(--green);
+  background: var(--green-dim);
+  opacity: 0.55;
+  cursor: default;
+}
+.match-item.wrong-flash {
+  animation: wb-shake 0.35s ease;
+  border-color: var(--red) !important;
+  background: rgba(229,62,62,0.12) !important;
+}
+.match-item.disabled { cursor: default; }
+.match-progress-text {
+  font-size: 13px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+
+/* ── AUTH SCREEN (ported from JP_N5_Lessons.html) ─────────────── */
+#screen-authgate {
+  display: none;
+  position: fixed; inset: 0; z-index: 200;
+  background: #0a1420;
+  color: #e8edf2;
+  font-family: Arial, sans-serif;
+  overflow-y: auto;
+}
+#screen-authgate.active { display: block; }
+#screen-authgate * { box-sizing: border-box; }
+.authgate-outer { max-width: 400px; margin: 0 auto; padding: 64px 20px; }
+.authgate-head { text-align: center; margin-bottom: 28px; }
+.authgate-head h1 { font-size: 1.9rem; color: #fff; margin-bottom: 8px; }
+.authgate-head h1 span { color: #c8a84b; }
+.authgate-head p { color: #8899aa; font-size: .88rem; line-height: 1.5; }
+.authgate-notice { background: rgba(50,200,80,.07); border: 1px solid rgba(50,200,80,.2); border-radius: 10px; padding: 11px 14px; margin-bottom: 16px; font-size: .8rem; color: #8899aa; }
+.authgate-tabs { display: flex; background: #111d2b; border: 1px solid #1e3040; border-radius: 10px; margin-bottom: 18px; overflow: hidden; }
+.authgate-tab { flex: 1; padding: 11px; text-align: center; cursor: pointer; font-size: .88rem; color: #8899aa; }
+.authgate-tab.active { background: rgba(200,168,75,.12); color: #c8a84b; font-weight: bold; }
+.authgate-fg { margin-bottom: 13px; }
+.authgate-fg label { display: block; font-size: .82rem; color: #8899aa; margin-bottom: 5px; }
+.authgate-fg input { width: 100%; background: #0d1a26; border: 1px solid #1e3040; border-radius: 8px; padding: 10px 13px; color: #e8edf2; font-size: .93rem; outline: none; }
+.authgate-fg input:focus { border-color: #c8a84b; }
+.authgate-btn-primary { width: 100%; background: #c8a84b; color: #111; border: none; border-radius: 8px; padding: 11px; font-size: .97rem; font-weight: bold; cursor: pointer; margin-top: 4px; }
+.authgate-btn-primary:hover { background: #b89630; }
+.authgate-msg { text-align: center; font-size: .82rem; padding: 8px; border-radius: 6px; margin-top: 10px; display: none; }
+.authgate-msg.err { background: rgba(200,50,50,.15); color: #ff8080; border: 1px solid rgba(200,50,50,.3); display: block; }
+.authgate-msg.ok { background: rgba(50,200,80,.15); color: #80ff90; border: 1px solid rgba(50,200,80,.3); display: block; }
+.authgate-skip { text-align: center; margin-top: 18px; }
+.authgate-skip a { color: #556677; font-size: .8rem; text-decoration: none; cursor: pointer; }
+.authgate-skip a:hover { color: #8899aa; }
+
+/* User bar (shown in Kotoba's sidebar once logged in) */
+.user-account-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+.user-account-name { color: var(--text2); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-account-logout {
+  background: transparent; border: 1px solid var(--border2); color: var(--text3);
+  padding: 3px 8px; border-radius: 6px; cursor: pointer; font-size: 11px;
+}
+.user-account-logout:hover { border-color: #cc3333; color: #cc3333; }
+.sync-indicator { font-size: 10px; color: var(--text3); padding: 0 10px 8px; }
+.sync-indicator.syncing { color: var(--accent); }
+.sync-indicator.synced { color: var(--green); }
+.sync-indicator.error { color: #ef4444; }
+</style>
+</head>
+<body>
+
+<!-- AUTH GATE (ported from JP_N5_Lessons.html) -->
+<div id="screen-authgate" class="active">
+  <div class="authgate-outer">
+    <div class="authgate-head">
+      <div style="font-size:2.5rem;margin-bottom:9px">📚</div>
+      <h1>言 <span>Kotoba</span></h1>
+      <p>Sign in to sync your progress across devices.<br>Or continue without an account — progress saves locally.</p>
+    </div>
+    <div class="authgate-notice">✅ <strong style="color:#e8edf2">Ready to use</strong> — create an account or log in below.</div>
+    <div class="authgate-tabs">
+      <div class="authgate-tab active" id="authgate-tab-l" onclick="authSwitchTab('login')">Log In</div>
+      <div class="authgate-tab" id="authgate-tab-r" onclick="authSwitchTab('register')">Sign Up</div>
+    </div>
+    <div id="authgate-pane-login">
+      <div class="authgate-fg"><label>Username</label><input type="text" id="authgate-l-user" placeholder="username" autocomplete="username"></div>
+      <div class="authgate-fg"><label>Password</label><input type="password" id="authgate-l-pass" placeholder="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')authDoLogin()"></div>
+      <button class="authgate-btn-primary" onclick="authDoLogin()">Log In →</button>
+    </div>
+    <div id="authgate-pane-reg" style="display:none">
+      <div class="authgate-fg"><label>Username</label><input type="text" id="authgate-r-user" placeholder="3+ chars, letters/numbers/_" autocomplete="username"></div>
+      <div class="authgate-fg"><label>Password</label><input type="password" id="authgate-r-pass" placeholder="6+ characters" autocomplete="new-password"></div>
+      <div class="authgate-fg"><label>Confirm Password</label><input type="password" id="authgate-r-pass2" placeholder="repeat password" onkeydown="if(event.key==='Enter')authDoRegister()"></div>
+      <button class="authgate-btn-primary" onclick="authDoRegister()">Create Account →</button>
+    </div>
+    <div class="authgate-msg" id="authgate-msg"></div>
+    <div class="authgate-skip"><a onclick="authSkip()">Continue without an account →</a></div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-mark">言</div>
+    <span class="logo-text"><span>Ko</span>toba</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Learn</div>
+    <div class="nav-item active" data-screen="dashboard" onclick="showScreen('dashboard')">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Dashboard</span>
+    </div>
+    <div class="nav-item" data-screen="courses" onclick="showScreen('courses')">
+      <span class="nav-icon">📚</span>
+      <span class="nav-label">Courses</span>
+    </div>
+    <div class="nav-item" data-screen="vocabulary" onclick="showScreen('vocabulary')">
+      <span class="nav-icon">📖</span>
+      <span class="nav-label">Vocabulary</span>
+    </div>
+    <div class="nav-item" data-screen="kana" onclick="showScreen('kana')">
+      <span class="nav-icon">あ</span>
+      <span class="nav-label">Kana Charts</span>
+    </div>
+
+    <div class="nav-section-label">Practice</div>
+    <div class="nav-item" data-screen="flashcards" onclick="showScreen('flashcards')">
+      <span class="nav-icon">🃏</span>
+      <span class="nav-label">Flashcards</span>
+    </div>
+    <div class="nav-item" data-screen="review" onclick="showScreen('review')">
+      <span class="nav-icon">🔁</span>
+      <span class="nav-label">Review</span>
+      <span class="nav-badge" id="review-count">12</span>
+    </div>
+  </nav>
+
+  <div id="user-account-bar" class="user-account-row" style="display:none">
+    <span class="user-account-name" id="user-account-name"></span>
+    <button class="user-account-logout" onclick="authLogout()">Log out</button>
+  </div>
+  <div id="sync-indicator" class="sync-indicator"></div>
+
+  <div class="xp-bar-wrap">
+    <div class="xp-level-badge" id="xp-level-badge">5</div>
+    <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:43%"></div></div>
+    <div class="xp-label" id="xp-label">430/1000</div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="nav-item" onclick="showScreen('settings')">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Settings</span>
+    </div>
+    <div class="nav-item" onclick="toggleTheme()">
+      <span class="nav-icon" id="theme-icon">☀️</span>
+      <span class="nav-label" id="theme-label">Light mode</span>
+    </div>
+  </div>
+
+  <div class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">◀</div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <a href="japanese.html" class="library-back-link" title="Back to the Japanese Library">
+      <span>←</span>
+      <span>Japanese Library</span>
+    </a>
+    <div class="topbar-divider"></div>
+    <div>
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-sub" id="topbar-sub">日本語 — Japanese</div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn tooltip" data-tip="Drawing tablet: off" id="tablet-toggle-btn" onclick="toggleTabletMode()" title="Drawing tablet">✏️</button>
+      <div id="tablet-mode-display" style="font-size:12px;color:var(--text3);display:none">
+        <span id="tablet-mode-text">Simple</span>
+      </div>
+      <button class="icon-btn tooltip" data-tip="Switch tablet mode" id="tablet-adv-btn" onclick="toggleTabletAdvanced()" style="display:none">🖊️</button>
+    </div>
+  </div>
+
+  <!-- CONTENT AREA -->
+  <div id="content">
+
+    <!-- DASHBOARD SCREEN -->
+    <div class="screen active" id="screen-dashboard">
+      <div class="dash-hero">
+        <div class="dash-hero-jp">日</div>
+        <div class="dash-hero-text">
+          <h2>Welcome back, Caleb</h2>
+          <p>You're on a 7-day streak. Today's goal: 15 minutes of Japanese.<br>
+          Pick up where you left off in <strong>N5 — Hiragana Fundamentals</strong>.</p>
+        </div>
+        <div class="streak-badge">
+          <div class="streak-num">7</div>
+          <div class="streak-label">Day streak</div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="s-icon">📝</div>
+          <div class="s-val">124</div>
+          <div class="s-label">Words learned</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-icon">⏱️</div>
+          <div class="s-val">4.2h</div>
+          <div class="s-label">Total study time</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-icon">✅</div>
+          <div class="s-val">83%</div>
+          <div class="s-label">Accuracy rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-icon">⭐</div>
+          <div class="s-val">430</div>
+          <div class="s-label">XP earned</div>
+        </div>
+      </div>
+
+      <div class="section-hd">Continue learning</div>
+      <div class="course-grid" id="dash-courses"></div>
+
+      <div class="section-hd">Word sets</div>
+      <div class="course-grid" id="dash-wordsets"></div>
+    </div>
+
+    <!-- COURSES SCREEN -->
+    <div class="screen" id="screen-courses">
+      <div class="section-hd" style="margin-bottom:16px">All courses — Japanese</div>
+      <div class="course-grid" id="all-courses"></div>
+    </div>
+
+    <!-- LESSON LIST SCREEN -->
+    <div class="screen" id="screen-lesson-list">
+      <div class="lesson-back" onclick="showScreen('courses')">← Back to courses</div>
+      <div id="lesson-list-header" style="margin-bottom:20px">
+        <h2 id="lesson-list-title" style="font-size:20px;font-weight:700;margin-bottom:4px"></h2>
+        <p id="lesson-list-sub" style="font-size:14px;color:var(--text2)"></p>
+      </div>
+      <div class="lesson-list" id="lesson-list-content"></div>
+    </div>
+
+    <!-- VOCABULARY SCREEN -->
+    <div class="screen" id="screen-vocabulary">
+      <div class="vocab-filters">
+        <button class="filter-chip active" onclick="filterVocab('all',this)">All</button>
+        <button class="filter-chip" onclick="filterVocab('N5',this)">N5</button>
+        <button class="filter-chip" onclick="filterVocab('N4',this)">N4</button>
+        <button class="filter-chip" onclick="filterVocab('N3',this)">N3</button>
+        <button class="filter-chip" onclick="filterVocab('learned',this)">Learned</button>
+        <input class="search-input" placeholder="Search words..." id="vocab-search" oninput="filterVocabSearch(this.value)">
+      </div>
+      <div class="vocab-grid" id="vocab-grid"></div>
+    </div>
+
+    <!-- KANA SCREEN -->
+    <div class="screen" id="screen-kana">
+      <div class="vocab-filters" style="margin-bottom:20px">
+        <button class="filter-chip active" onclick="switchKana('hiragana',this)">Hiragana</button>
+        <button class="filter-chip" onclick="switchKana('katakana',this)">Katakana</button>
+      </div>
+      <div class="section-hd" id="kana-section-label">Basic hiragana</div>
+      <div class="kana-grid" id="kana-grid"></div>
+    </div>
+
+    <!-- FLASHCARDS SCREEN -->
+    <div class="screen" id="screen-flashcards">
+      <div id="fc-setup">
+        <div class="section-hd" style="margin-bottom:16px">Flashcard sets</div>
+        <div class="course-grid" id="fc-sets"></div>
+      </div>
+      <div id="fc-session" style="display:none;max-width:600px;margin:0 auto;text-align:center;padding-top:40px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+          <div class="lesson-progress-track" style="flex:1">
+            <div class="lesson-progress-fill" id="fc-progress" style="width:0%"></div>
+          </div>
+          <span id="fc-counter" style="font-size:13px;color:var(--text2)">0/0</span>
+          <button class="btn" onclick="endFlashcards()">Exit</button>
+        </div>
+        <div id="fc-card" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:48px 40px;cursor:pointer;min-height:220px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;transition:transform 0.3s" onclick="flipCard()">
+          <div id="fc-front" style="font-family:'Noto Sans JP',sans-serif;font-size:52px;font-weight:700;text-align:center"></div>
+          <div id="fc-back" style="display:none;font-size:20px;color:var(--text2);text-align:center"></div>
+          <div id="fc-hint" style="font-size:13px;color:var(--text3);margin-top:8px">Click to flip</div>
+        </div>
+        <div id="fc-actions" style="display:none;margin-top:20px;display:none">
+          <div style="display:flex;justify-content:center;gap:16px;margin-top:16px">
+            <button class="btn" onclick="rateCard('again')" style="border-color:var(--red);color:var(--red)">Again</button>
+            <button class="btn" onclick="rateCard('hard')" style="border-color:#f59e0b;color:#f59e0b">Hard</button>
+            <button class="btn" onclick="rateCard('good')" style="border-color:var(--green);color:var(--green)">Good</button>
+            <button class="btn primary" onclick="rateCard('easy')">Easy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVIEW SCREEN -->
+    <div class="screen" id="screen-review">
+      <div class="section-hd" style="margin-bottom:12px">Due for review</div>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:20px">Words flagged for spaced repetition review today.</p>
+      <button class="btn primary" onclick="startLesson('review-session')" style="margin-bottom:24px">Start review session</button>
+      <div class="lesson-list" id="review-list"></div>
+    </div>
+
+    <!-- SETTINGS SCREEN -->
+    <div class="screen" id="screen-settings">
+      <div class="section-hd" style="margin-bottom:16px">Settings</div>
+
+      <div class="settings-card">
+        <div style="font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-size:12px">Drawing tablet</div>
+        <div class="settings-row">
+          <div><div class="settings-row-label" style="font-size:14px">Enable drawing tablet</div><div class="s-hint">Write characters instead of typing on desktop</div></div>
+          <div class="toggle-switch" id="settings-tablet-toggle" onclick="toggleTabletSetting(this)"></div>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label" style="font-size:14px">Tablet mode</div><div class="s-hint">Simple: write new kana/kanji only. Advanced: write all answers.</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="filter-chip active" id="mode-simple-btn" onclick="setTabletModeBtn('simple')">Simple</button>
+            <button class="filter-chip" id="mode-adv-btn" onclick="setTabletModeBtn('advanced')">Advanced</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label" style="font-size:14px">Brush size</div><div class="s-hint">Drawing stroke width</div></div>
+          <input type="range" min="2" max="16" value="5" id="brush-size-range" style="width:120px" oninput="setBrushSize(this.value)">
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div style="font-size:12px;font-weight:600;margin-bottom:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Display</div>
+        <div class="settings-row">
+          <div><div style="font-size:14px">Keyboardless mode</div><div class="s-hint">Replace typing with word-bank tiles (like Duolingo). Great without a Japanese IME.</div></div>
+          <div class="toggle-switch" id="keyboardless-toggle" onclick="toggleKeyboardless(this)"></div>
+        </div>
+        <div class="settings-row">
+          <div><div style="font-size:14px">Show furigana</div><div class="s-hint">Show reading above kanji in lessons</div></div>
+          <div class="toggle-switch on" id="furigana-toggle" onclick="toggleFurigana(this)"></div>
+        </div>
+        <div class="settings-row">
+          <div><div style="font-size:14px">Romaji hints</div><div class="s-hint">Show romanization under kana in new lessons</div></div>
+          <div class="toggle-switch on" id="romaji-toggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="settings-row">
+          <div><div style="font-size:14px">Dark mode</div></div>
+          <div class="toggle-switch on" id="dark-mode-toggle" onclick="toggleThemeFromSettings(this)"></div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div style="font-size:12px;font-weight:600;margin-bottom:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Daily goal</div>
+        <div class="settings-row">
+          <div><div style="font-size:14px">Minutes per day</div></div>
+          <select style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:6px 12px;font-size:14px">
+            <option>5 min — Casual</option>
+            <option selected>15 min — Regular</option>
+            <option>30 min — Serious</option>
+            <option>60 min — Intense</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div style="font-size:12px;font-weight:600;margin-bottom:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Data</div>
+        <div class="settings-row">
+          <div><div style="font-size:14px">Reset all progress</div><div class="s-hint">Clears XP, streak, completed lessons, and learned words</div></div>
+          <button class="btn" style="border-color:var(--red);color:var(--red)" onclick="resetProgress()">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LESSON ENGINE SCREEN -->
+    <div id="lesson-screen">
+      <div class="lesson-topbar">
+        <button class="icon-btn" onclick="exitLesson()" title="Exit lesson" style="font-size:14px">✕</button>
+        <div class="lesson-progress-track">
+          <div class="lesson-progress-fill" id="lesson-progress" style="width:0%"></div>
+        </div>
+        <div class="lesson-hearts" id="lesson-hearts">
+          <span class="heart" id="h1">❤️</span>
+          <span class="heart" id="h2">❤️</span>
+          <span class="heart" id="h3">❤️</span>
+        </div>
+        <div class="lesson-xp-counter">⭐ <span id="lesson-xp-display">0</span></div>
+      </div>
+
+      <div class="lesson-body" id="lesson-body">
+        <!-- Dynamically populated -->
+      </div>
+
+      <div class="feedback-bar" id="feedback-bar">
+        <span class="fb-icon" id="fb-icon"></span>
+        <div class="fb-text">
+          <div class="fb-title" id="fb-title"></div>
+          <div class="fb-sub" id="fb-sub"></div>
+        </div>
+        <button class="fb-btn" id="fb-btn" onclick="nextQuestion()">Continue</button>
+      </div>
+
+      <!-- Drawing tablet overlay -->
+      <div class="tablet-overlay" id="tablet-overlay">
+        <div class="tablet-header">
+          <span class="tablet-title" id="tablet-label-text">Draw the character</span>
+          <div class="tablet-tools">
+            <button class="t-tool-btn" onclick="clearCanvas()">Clear</button>
+            <button class="t-tool-btn" onclick="undoStroke()">Undo</button>
+            <button class="t-tool-btn primary" onclick="submitDrawing()">Check</button>
+          </div>
+        </div>
+        <canvas id="draw-canvas" width="320" height="220"></canvas>
+        <div class="tablet-result" id="tablet-result"></div>
+      </div>
+    </div>
+
+    <!-- LESSON COMPLETE SCREEN -->
+    <div class="screen" id="screen-lesson-complete">
+      <div class="result-screen" id="result-content"></div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div class="modal-box">
+    <h3 id="modal-title">Exit lesson?</h3>
+    <p id="modal-body">Your progress in this lesson will be lost. Are you sure?</p>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" id="modal-confirm-btn" onclick="">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+// DATA — COURSES, LESSONS, VOCABULARY
+// ════════════════════════════════════════════════
+const COURSES = [
+  {
+    id: 'n5-hiragana', level: 'N5', title: 'Hiragana Fundamentals',
+    sub: 'Master the 46 basic hiragana characters', progress: 42,
+    lessons: 12, color: 'level-n5', locked: false,
+    lessons_data: [
+      { id:'h1', title:'Vowels: あいうえお', sub:'The 5 core vowels', type:'kana-intro', xp:30, status:'completed' },
+      { id:'h2', title:'K-row: かきくけこ', sub:'Ka ki ku ke ko', type:'kana-intro', xp:30, status:'completed' },
+      { id:'h3', title:'S-row: さしすせそ', sub:'Sa shi su se so', type:'kana-intro', xp:30, status:'current' },
+      { id:'h4', title:'T-row: たちつてと', sub:'Ta chi tsu te to', type:'kana-intro', xp:30, status:'locked' },
+      { id:'h5', title:'N-row: なにぬねの', sub:'Na ni nu ne no', type:'kana-intro', xp:30, status:'locked' },
+      { id:'h6', title:'H-row: はひふへほ', sub:'Ha hi fu he ho', type:'kana-intro', xp:30, status:'locked' },
+      { id:'h7', title:'M-row: まみむめも', sub:'Ma mi mu me mo', type:'kana-intro', xp:30, status:'locked' },
+      { id:'h8', title:'Y-row: やゆよ + ら行', sub:'Ya yu yo ra ri ru re ro', type:'kana-intro', xp:35, status:'locked' },
+      { id:'h9', title:'W-row + ん', sub:'Wa wi we wo n', type:'kana-intro', xp:35, status:'locked' },
+      { id:'h10', title:'Dakuten: voiced sounds', sub:'Ga gi gu ge go etc.', type:'kana-intro', xp:40, status:'locked' },
+      { id:'h11', title:'Combination kana', sub:'きゃ, にゅ, ひょ etc.', type:'kana-intro', xp:40, status:'locked' },
+      { id:'h12', title:'Hiragana mastery test', sub:'All 46 characters', type:'test', xp:80, status:'locked' },
+    ]
+  },
+  {
+    id: 'n5-hiragana-dakuten', level: 'N5', title: 'Hiragana Dakuten',
+    sub: 'Voiced & semi-voiced sounds — が、ざ、だ、ば、ぱ rows', progress: 0,
+    lessons: 5, color: 'level-n5', locked: false,
+    lessons_data: [
+      { id:'hd1', title:'が-row: がぎぐげご', sub:'Ga gi gu ge go', type:'kana-intro', xp:30, status:'current' },
+      { id:'hd2', title:'ざ-row: ざじずぜぞ', sub:'Za ji zu ze zo', type:'kana-intro', xp:30, status:'locked' },
+      { id:'hd3', title:'だ-row: だぢづでど', sub:'Da ji zu de do', type:'kana-intro', xp:30, status:'locked' },
+      { id:'hd4', title:'ば-row: ばびぶべぼ', sub:'Ba bi bu be bo', type:'kana-intro', xp:30, status:'locked' },
+      { id:'hd5', title:'ぱ-row: ぱぴぷぺぽ', sub:'Pa pi pu pe po (handakuten)', type:'kana-intro', xp:35, status:'locked' },
+    ]
+  },
+  {
+    id: 'n5-hiragana-youon', level: 'N5', title: 'Hiragana Combination Kana',
+    sub: 'Yōon — きゃ、しゃ、ちゃ and voiced combinations', progress: 0,
+    lessons: 4, color: 'level-n5', locked: false,
+    lessons_data: [
+      { id:'hy1', title:'きゃ・しゃ・ちゃ rows', sub:'Kya/kyu/kyo, sha/shu/sho, cha/chu/cho', type:'kana-intro', xp:35, status:'current' },
+      { id:'hy2', title:'にゃ・ひゃ rows', sub:'Nya/nyu/nyo, hya/hyu/hyo', type:'kana-intro', xp:35, status:'locked' },
+      { id:'hy3', title:'みゃ・りゃ rows', sub:'Mya/myu/myo, rya/ryu/ryo', type:'kana-intro', xp:35, status:'locked' },
+      { id:'hy4', title:'Voiced combinations', sub:'ぎゃ、じゃ、ぢゃ、びゃ、ぴゃ rows', type:'kana-intro', xp:40, status:'locked' },
+    ]
+  },
+  {
+    id: 'n5-katakana', level: 'N5', title: 'Katakana',
+    sub: 'Learn the 46 katakana for foreign words', progress: 0,
+    lessons: 9, color: 'level-n5', locked: false,
+    lessons_data: [
+      { id:'k1', title:'Vowels: アイウエオ', sub:'A i u e o', type:'kana-intro', xp:30, status:'current' },
+      { id:'k2', title:'K-row: カキクケコ', sub:'Ka ki ku ke ko', type:'kana-intro', xp:30, status:'locked' },
+      { id:'k3', title:'S-row: サシスセソ', sub:'Sa shi su se so', type:'kana-intro', xp:30, status:'locked' },
+      { id:'k4', title:'T-row: タチツテト', sub:'Ta chi tsu te to', type:'kana-intro', xp:30, status:'locked' },
+      { id:'k5', title:'N-row: ナニヌネノ', sub:'Na ni nu ne no', type:'kana-intro', xp:30, status:'locked' },
+      { id:'k6', title:'H-row: ハヒフヘホ', sub:'Ha hi fu he ho', type:'kana-intro', xp:30, status:'locked' },
+      { id:'k7', title:'M-row: マミムメモ', sub:'Ma mi mu me mo', type:'kana-intro', xp:30, status:'locked' },
+      { id:'k8', title:'Y-row: ヤユヨ + ラ行', sub:'Ya yu yo ra ri ru re ro', type:'kana-intro', xp:35, status:'locked' },
+      { id:'k9', title:'W-row + ン', sub:'Wa wo n', type:'kana-intro', xp:35, status:'locked' },
+    ]
+  },
+  {
+    id: 'n5-katakana-dakuten', level: 'N5', title: 'Katakana Dakuten',
+    sub: 'Voiced & semi-voiced sounds — ガ、ザ、ダ、バ、パ rows', progress: 0,
+    lessons: 5, color: 'level-n5', locked: false,
+    lessons_data: [
+      { id:'kd1', title:'ガ-row: ガギグゲゴ', sub:'Ga gi gu ge go', type:'kana-intro', xp:30, status:'current' },
+      { id:'kd2', title:'ザ-row: ザジズゼゾ', sub:'Za ji zu ze zo', type:'kana-intro', xp:30, status:'locked' },
+      { id:'kd3', title:'ダ-row: ダヂヅデド', sub:'Da ji zu de do', type:'kana-intro', xp:30, status:'locked' },
+      { id:'kd4', title:'バ-row: バビブベボ', sub:'Ba bi bu be bo', type:'kana-intro', xp:30, status:'locked' },
+      { id:'kd5', title:'パ-row: パピプペポ', sub:'Pa pi pu pe po (handakuten)', type:'kana-intro', xp:35, status:'locked' },
+    ]
+  },
+  {
+    id: 'n5-katakana-youon', level: 'N5', title: 'Katakana Combination Kana',
+    sub: 'Yōon — キャ、シャ、チャ and voiced combinations', progress: 0,
+    lessons: 4, color: 'level-n5', locked: false,
+    lessons_data: [
+      { id:'ky1', title:'キャ・シャ・チャ rows', sub:'Kya/kyu/kyo, sha/shu/sho, cha/chu/cho', type:'kana-intro', xp:35, status:'current' },
+      { id:'ky2', title:'ニャ・ヒャ rows', sub:'Nya/nyu/nyo, hya/hyu/hyo', type:'kana-intro', xp:35, status:'locked' },
+      { id:'ky3', title:'ミャ・リャ rows', sub:'Mya/myu/myo, rya/ryu/ryo', type:'kana-intro', xp:35, status:'locked' },
+      { id:'ky4', title:'Voiced combinations', sub:'ギャ、ジャ、ヂャ、ビャ、ピャ rows', type:'kana-intro', xp:40, status:'locked' },
+    ]
+  },
+  {
+    id: 'n5-basics', level: 'N5', title: 'N5 Essential Words',
+    sub: '~800 foundational vocabulary words', progress: 18,
+    lessons: 20, color: 'level-n5', locked: false,
+    lessons_data: [
+      { id:'b1', title:'Greetings', sub:'Hello, goodbye, thank you', type:'vocab', xp:25, status:'completed' },
+      { id:'b2', title:'Numbers 1–10', sub:'いち に さん し ご...', type:'vocab', xp:25, status:'completed' },
+      { id:'b3', title:'Numbers 11–100', sub:'Tens and hundreds', type:'vocab', xp:30, status:'current' },
+      { id:'b4', title:'Days of the week', sub:'Monday through Sunday', type:'vocab', xp:30, status:'locked' },
+      { id:'b5', title:'Months & time', sub:'January through December', type:'vocab', xp:35, status:'locked' },
+      { id:'b6', title:'Colors', sub:'Red, blue, white, black...', type:'vocab', xp:30, status:'locked' },
+      { id:'b7', title:'Family members', sub:'Mother, father, sister...', type:'vocab', xp:30, status:'locked' },
+      { id:'b8', title:'Body parts', sub:'Head, hand, foot...', type:'vocab', xp:30, status:'locked' },
+      { id:'b9', title:'Food & drink', sub:'Rice, water, tea...', type:'vocab', xp:35, status:'locked' },
+      { id:'b10', title:'Adjectives I', sub:'Big, small, hot, cold...', type:'vocab', xp:35, status:'locked' },
+    ]
+  },
+  {
+    id: 'n5-grammar', level: 'N5', title: 'N5 Grammar Patterns',
+    sub: 'Core sentence structure and particles', progress: 5,
+    lessons: 15, color: 'level-n5', locked: false,
+    lessons_data: [
+      { id:'g1', title:'です / ます form', sub:'Polite verb endings', type:'grammar', xp:40, status:'current' },
+      { id:'g2', title:'Particles は、が、を', sub:'Topic, subject, object markers', type:'grammar', xp:40, status:'locked' },
+      { id:'g3', title:'Particle に — direction', sub:'Going to, at a time', type:'grammar', xp:40, status:'locked' },
+      { id:'g4', title:'Particle で — location', sub:'At a place, by means of', type:'grammar', xp:40, status:'locked' },
+      { id:'g5', title:'Question sentences', sub:'か particle and question words', type:'grammar', xp:40, status:'locked' },
+    ]
+  },
+  {
+    id: 'n5-sentences', level: 'N5', title: 'Sentence Builder',
+    sub: 'Arrange words into real Japanese sentences', progress: 0,
+    lessons: 3, color: 'level-n5', locked: false,
+    lessons_data: [
+      { id:'sb-greetings', title:'Greetings & Introductions', sub:'Build sentences with おはよう, すみません, etc.', type:'sentence-build', xp:40, status:'current' },
+      { id:'sb-numbers', title:'Numbers in Sentences', sub:'Use counters and time expressions', type:'sentence-build', xp:40, status:'locked' },
+      { id:'sb-grammar', title:'Core Grammar Patterns', sub:'は、を、に particles in real sentences', type:'sentence-build', xp:50, status:'locked' },
+    ]
+  },
+  {
+    id: 'n4-vocab', level: 'N4', title: 'N4 Vocabulary',
+    sub: '~1,500 essential N4 words', progress: 0,
+    lessons: 25, color: 'level-n4', locked: true
+  },
+  {
+    id: 'n3-vocab', level: 'N3', title: 'N3 Vocabulary',
+    sub: '~3,750 intermediate words', progress: 0,
+    lessons: 40, color: 'level-n3', locked: true
+  },
+];
+
+const VOCAB = [
+  { jp:'こんにちは', read:'konnichiwa', en:'Hello / Good afternoon', level:'N5', learned:true },
+  { jp:'ありがとう', read:'arigatou', en:'Thank you', level:'N5', learned:true },
+  { jp:'おはよう', read:'ohayou', en:'Good morning', level:'N5', learned:true },
+  { jp:'さようなら', read:'sayounara', en:'Goodbye', level:'N5', learned:true },
+  { jp:'はい', read:'hai', en:'Yes', level:'N5', learned:true },
+  { jp:'いいえ', read:'iie', en:'No', level:'N5', learned:true },
+  { jp:'すみません', read:'sumimasen', en:'Excuse me / Sorry', level:'N5', learned:true },
+  { jp:'わかりません', read:'wakarimasen', en:"I don't understand", level:'N5', learned:false },
+  { jp:'一', read:'ichi', en:'One (1)', level:'N5', learned:true },
+  { jp:'二', read:'ni', en:'Two (2)', level:'N5', learned:true },
+  { jp:'三', read:'san', en:'Three (3)', level:'N5', learned:true },
+  { jp:'四', read:'shi / yon', en:'Four (4)', level:'N5', learned:true },
+  { jp:'五', read:'go', en:'Five (5)', level:'N5', learned:true },
+  { jp:'六', read:'roku', en:'Six (6)', level:'N5', learned:false },
+  { jp:'七', read:'shichi / nana', en:'Seven (7)', level:'N5', learned:false },
+  { jp:'八', read:'hachi', en:'Eight (8)', level:'N5', learned:false },
+  { jp:'九', read:'ku / kyuu', en:'Nine (9)', level:'N5', learned:false },
+  { jp:'十', read:'juu', en:'Ten (10)', level:'N5', learned:false },
+  { jp:'水', read:'mizu', en:'Water', level:'N5', learned:false },
+  { jp:'食べる', read:'taberu', en:'To eat', level:'N5', learned:false },
+  { jp:'飲む', read:'nomu', en:'To drink', level:'N5', learned:false },
+  { jp:'行く', read:'iku', en:'To go', level:'N5', learned:false },
+  { jp:'来る', read:'kuru', en:'To come', level:'N5', learned:false },
+  { jp:'見る', read:'miru', en:'To see / watch', level:'N5', learned:false },
+  { jp:'大きい', read:'ookii', en:'Big / large', level:'N5', learned:false },
+  { jp:'小さい', read:'chiisai', en:'Small / little', level:'N5', learned:false },
+  { jp:'友達', read:'tomodachi', en:'Friend', level:'N4', learned:false },
+  { jp:'勉強', read:'benkyou', en:'Study', level:'N4', learned:false },
+  { jp:'電車', read:'densha', en:'Train (electric)', level:'N4', learned:false },
+  { jp:'運転', read:'unten', en:'Driving / operation', level:'N4', learned:false },
+];
+
+const HIRAGANA = [
+  {c:'あ',r:'a'},{c:'い',r:'i'},{c:'う',r:'u'},{c:'え',r:'e'},{c:'お',r:'o'},
+  {c:'か',r:'ka'},{c:'き',r:'ki'},{c:'く',r:'ku'},{c:'け',r:'ke'},{c:'こ',r:'ko'},
+  {c:'さ',r:'sa'},{c:'し',r:'shi'},{c:'す',r:'su'},{c:'せ',r:'se'},{c:'そ',r:'so'},
+  {c:'た',r:'ta'},{c:'ち',r:'chi'},{c:'つ',r:'tsu'},{c:'て',r:'te'},{c:'と',r:'to'},
+  {c:'な',r:'na'},{c:'に',r:'ni'},{c:'ぬ',r:'nu'},{c:'ね',r:'ne'},{c:'の',r:'no'},
+  {c:'は',r:'ha'},{c:'ひ',r:'hi'},{c:'ふ',r:'fu'},{c:'へ',r:'he'},{c:'ほ',r:'ho'},
+  {c:'ま',r:'ma'},{c:'み',r:'mi'},{c:'む',r:'mu'},{c:'め',r:'me'},{c:'も',r:'mo'},
+  {c:'や',r:'ya'},{c:'ゆ',r:'yu'},{c:'よ',r:'yo'},
+  {c:'ら',r:'ra'},{c:'り',r:'ri'},{c:'る',r:'ru'},{c:'れ',r:'re'},{c:'ろ',r:'ro'},
+  {c:'わ',r:'wa'},{c:'を',r:'wo'},{c:'ん',r:'n'},
+];
+const KATAKANA = [
+  {c:'ア',r:'a'},{c:'イ',r:'i'},{c:'ウ',r:'u'},{c:'エ',r:'e'},{c:'オ',r:'o'},
+  {c:'カ',r:'ka'},{c:'キ',r:'ki'},{c:'ク',r:'ku'},{c:'ケ',r:'ke'},{c:'コ',r:'ko'},
+  {c:'サ',r:'sa'},{c:'シ',r:'shi'},{c:'ス',r:'su'},{c:'セ',r:'se'},{c:'ソ',r:'so'},
+  {c:'タ',r:'ta'},{c:'チ',r:'chi'},{c:'ツ',r:'tsu'},{c:'テ',r:'te'},{c:'ト',r:'to'},
+  {c:'ナ',r:'na'},{c:'ニ',r:'ni'},{c:'ヌ',r:'nu'},{c:'ネ',r:'ne'},{c:'ノ',r:'no'},
+  {c:'ハ',r:'ha'},{c:'ヒ',r:'hi'},{c:'フ',r:'fu'},{c:'ヘ',r:'he'},{c:'ホ',r:'ho'},
+  {c:'マ',r:'ma'},{c:'ミ',r:'mi'},{c:'ム',r:'mu'},{c:'メ',r:'me'},{c:'モ',r:'mo'},
+  {c:'ヤ',r:'ya'},{c:'ユ',r:'yu'},{c:'ヨ',r:'yo'},
+  {c:'ラ',r:'ra'},{c:'リ',r:'ri'},{c:'ル',r:'ru'},{c:'レ',r:'re'},{c:'ロ',r:'ro'},
+  {c:'ワ',r:'wa'},{c:'ヲ',r:'wo'},{c:'ン',r:'n'},
+];
+
+// ── Dakuten / handakuten (voiced & semi-voiced sounds) ──────
+// が-row, ざ-row, だ-row, ば-row (dakuten — adds two small marks)
+// ぱ-row (handakuten — adds a small circle)
+const HIRAGANA_DAKUTEN = [
+  {c:'が',r:'ga'},{c:'ぎ',r:'gi'},{c:'ぐ',r:'gu'},{c:'げ',r:'ge'},{c:'ご',r:'go'},
+  {c:'ざ',r:'za'},{c:'じ',r:'ji'},{c:'ず',r:'zu'},{c:'ぜ',r:'ze'},{c:'ぞ',r:'zo'},
+  {c:'だ',r:'da'},{c:'ぢ',r:'ji'},{c:'づ',r:'zu'},{c:'で',r:'de'},{c:'ど',r:'do'},
+  {c:'ば',r:'ba'},{c:'び',r:'bi'},{c:'ぶ',r:'bu'},{c:'べ',r:'be'},{c:'ぼ',r:'bo'},
+  {c:'ぱ',r:'pa'},{c:'ぴ',r:'pi'},{c:'ぷ',r:'pu'},{c:'ぺ',r:'pe'},{c:'ぽ',r:'po'},
+];
+const KATAKANA_DAKUTEN = [
+  {c:'ガ',r:'ga'},{c:'ギ',r:'gi'},{c:'グ',r:'gu'},{c:'ゲ',r:'ge'},{c:'ゴ',r:'go'},
+  {c:'ザ',r:'za'},{c:'ジ',r:'ji'},{c:'ズ',r:'zu'},{c:'ゼ',r:'ze'},{c:'ゾ',r:'zo'},
+  {c:'ダ',r:'da'},{c:'ヂ',r:'ji'},{c:'ヅ',r:'zu'},{c:'デ',r:'de'},{c:'ド',r:'do'},
+  {c:'バ',r:'ba'},{c:'ビ',r:'bi'},{c:'ブ',r:'bu'},{c:'ベ',r:'be'},{c:'ボ',r:'bo'},
+  {c:'パ',r:'pa'},{c:'ピ',r:'pi'},{c:'プ',r:'pu'},{c:'ペ',r:'pe'},{c:'ポ',r:'po'},
+];
+
+// ── Yōon / combination kana (consonant-i kana + small や/ゆ/よ) ──
+// Plain rows: きゃ(kya) ぎゃ(gya) しゃ(sha) じゃ(ja) ちゃ(cha) ぢゃ(ja)
+//             にゃ(nya) ひゃ(hya) びゃ(bya) ぴゃ(pya) みゃ(mya) りゃ(rya)
+const HIRAGANA_YOON = [
+  {c:'きゃ',r:'kya'},{c:'きゅ',r:'kyu'},{c:'きょ',r:'kyo'},
+  {c:'しゃ',r:'sha'},{c:'しゅ',r:'shu'},{c:'しょ',r:'sho'},
+  {c:'ちゃ',r:'cha'},{c:'ちゅ',r:'chu'},{c:'ちょ',r:'cho'},
+  {c:'にゃ',r:'nya'},{c:'にゅ',r:'nyu'},{c:'にょ',r:'nyo'},
+  {c:'ひゃ',r:'hya'},{c:'ひゅ',r:'hyu'},{c:'ひょ',r:'hyo'},
+  {c:'みゃ',r:'mya'},{c:'みゅ',r:'myu'},{c:'みょ',r:'myo'},
+  {c:'りゃ',r:'rya'},{c:'りゅ',r:'ryu'},{c:'りょ',r:'ryo'},
+];
+// Voiced/semi-voiced yōon (built on dakuten/handakuten kana)
+const HIRAGANA_YOON_DAKUTEN = [
+  {c:'ぎゃ',r:'gya'},{c:'ぎゅ',r:'gyu'},{c:'ぎょ',r:'gyo'},
+  {c:'じゃ',r:'ja'},{c:'じゅ',r:'ju'},{c:'じょ',r:'jo'},
+  {c:'ぢゃ',r:'ja'},{c:'ぢゅ',r:'ju'},{c:'ぢょ',r:'jo'},
+  {c:'びゃ',r:'bya'},{c:'びゅ',r:'byu'},{c:'びょ',r:'byo'},
+  {c:'ぴゃ',r:'pya'},{c:'ぴゅ',r:'pyu'},{c:'ぴょ',r:'pyo'},
+];
+const KATAKANA_YOON = [
+  {c:'キャ',r:'kya'},{c:'キュ',r:'kyu'},{c:'キョ',r:'kyo'},
+  {c:'シャ',r:'sha'},{c:'シュ',r:'shu'},{c:'ショ',r:'sho'},
+  {c:'チャ',r:'cha'},{c:'チュ',r:'chu'},{c:'チョ',r:'cho'},
+  {c:'ニャ',r:'nya'},{c:'ニュ',r:'nyu'},{c:'ニョ',r:'nyo'},
+  {c:'ヒャ',r:'hya'},{c:'ヒュ',r:'hyu'},{c:'ヒョ',r:'hyo'},
+  {c:'ミャ',r:'mya'},{c:'ミュ',r:'myu'},{c:'ミョ',r:'myo'},
+  {c:'リャ',r:'rya'},{c:'リュ',r:'ryu'},{c:'リョ',r:'ryo'},
+];
+const KATAKANA_YOON_DAKUTEN = [
+  {c:'ギャ',r:'gya'},{c:'ギュ',r:'gyu'},{c:'ギョ',r:'gyo'},
+  {c:'ジャ',r:'ja'},{c:'ジュ',r:'ju'},{c:'ジョ',r:'jo'},
+  {c:'ヂャ',r:'ja'},{c:'ヂュ',r:'ju'},{c:'ヂョ',r:'jo'},
+  {c:'ビャ',r:'bya'},{c:'ビュ',r:'byu'},{c:'ビョ',r:'byo'},
+  {c:'ピャ',r:'pya'},{c:'ピュ',r:'pyu'},{c:'ピョ',r:'pyo'},
+];
+
+
+// ════════════════════════════════════════════════
+// PERSISTENCE
+// ════════════════════════════════════════════════
+const SAVE_KEY = 'kotoba_save_v1';
+
+function defaultSave() {
+  return {
+    xp: 0,
+    level: 1,
+    streak: 0,
+    lastStudyDate: null,
+    completedLessons: {},   // { lessonId: true }
+    learnedVocab: {},       // { jp: true }
+    courseProgress: {},     // { courseId: 0-100 }
+    tabletEnabled: false,
+    tabletAdvanced: false,
+    brushSize: 5,
+    theme: 'dark',
+    showFurigana: true,
+    showRomaji: true,
+    keyboardless: false,
+    dailyGoalMinutes: 15,
+    totalStudyMinutes: 0,
+    accuracy: { correct: 0, total: 0 },
+  };
+}
+
+function loadSave() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return defaultSave();
+    return Object.assign(defaultSave(), JSON.parse(raw));
+  } catch(e) { return defaultSave(); }
+}
+
+function writeSave() {
+  try {
+    const toSave = {
+      xp: state.xp,
+      level: state.level,
+      streak: state.streak,
+      lastStudyDate: state.lastStudyDate,
+      completedLessons: state.completedLessons,
+      learnedVocab: state.learnedVocab,
+      courseProgress: state.courseProgress,
+      tabletEnabled: state.tabletEnabled,
+      tabletAdvanced: state.tabletAdvanced,
+      brushSize: state.brushSize,
+      theme: state.theme,
+      showFurigana: state.showFurigana,
+      showRomaji: state.showRomaji,
+      keyboardless: state.keyboardless,
+      dailyGoalMinutes: state.dailyGoalMinutes,
+      totalStudyMinutes: state.totalStudyMinutes,
+      accuracy: state.accuracy,
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(toSave));
+    authQueueSync(toSave);
+  } catch(e) { console.warn('Save failed:', e); }
+}
+
+function checkAndUpdateStreak() {
+  const today = new Date().toDateString();
+  const last = state.lastStudyDate;
+  if (last === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  if (last === yesterday) {
+    state.streak++;
+  } else if (last !== null) {
+    state.streak = 1;
+  } else {
+    state.streak = 1;
+  }
+  state.lastStudyDate = today;
+}
+
+// ════════════════════════════════════════════════
+// AUTH SYSTEM (ported from JP_N5_Lessons.html, same backend contract:
+// action=register|login|progress|save against a Google Apps Script web app)
+// ════════════════════════════════════════════════
+const APIURL = 'https://script.google.com/macros/s/AKfycbyzF3VXKQJJHcL_CJ-l1olCV_J6qM8aqN0bYhrADj73-s4OhbVTcQHuTnlrAnAhbSeu/exec';
+const AUTH_SESSION_KEY = 'jlpt_sess'; // same key the old site used, so an existing session carries over
+
+let authUser = null;
+let authToken = null;
+let authSyncTimer = null;
+let authSyncing = false;
+
+function authApi(params, cb) {
+  const qs = Object.keys(params).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])).join('&');
+  fetch(APIURL + '?' + qs)
+    .then(r => {
+      if (!r.ok) {
+        return r.text().then(t => {
+          throw new Error(`HTTP ${r.status} ${r.statusText} — ${t.slice(0,200)}`);
+        });
+      }
+      return r.text();
+    })
+    .then(text => {
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        // Apps Script returned something that isn't JSON — usually an HTML
+        // permissions/login page, meaning the deployment isn't public yet.
+        throw new Error('Response was not JSON (got: ' + text.slice(0,150).replace(/\s+/g,' ') + '…) — the Apps Script deployment may not be set to "Anyone" access, or the URL is wrong.');
+      }
+    })
+    .then(d => cb(d))
+    .catch(err => {
+      console.error('authApi failed:', err);
+      const isLocalFile = location.protocol === 'file:';
+      const msg = isLocalFile
+        ? 'Network error — this page is open as a local file. Browsers block requests like this from file:// pages; deploy to GitHub Pages (or any https:// host) and it should work.'
+        : ('Network error: ' + (err && err.message ? err.message : 'unknown — check the browser console for details'));
+      cb({ success: false, error: msg });
+    });
+}
+
+function authSetMsg(msg, type) {
+  const el = document.getElementById('authgate-msg');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'authgate-msg' + (type ? ' ' + type : '');
+}
+
+function authSwitchTab(t) {
+  document.getElementById('authgate-tab-l').classList.toggle('active', t === 'login');
+  document.getElementById('authgate-tab-r').classList.toggle('active', t === 'register');
+  document.getElementById('authgate-pane-login').style.display = t === 'login' ? 'block' : 'none';
+  document.getElementById('authgate-pane-reg').style.display = t === 'register' ? 'block' : 'none';
+  authSetMsg('', '');
+}
+
+function authDoLogin() {
+  const u = document.getElementById('authgate-l-user').value.trim();
+  const p = document.getElementById('authgate-l-pass').value;
+  if (!u || !p) { authSetMsg('Please fill in both fields', 'err'); return; }
+  authSetMsg('Logging in…', '');
+  authApi({ action: 'login', username: u, password: p }, d => {
+    if (d.success) authOnSuccess(d);
+    else authSetMsg(d.error || 'Login failed', 'err');
+  });
+}
+
+function authDoRegister() {
+  const u = document.getElementById('authgate-r-user').value.trim();
+  const p = document.getElementById('authgate-r-pass').value;
+  const p2 = document.getElementById('authgate-r-pass2').value;
+  if (!u || !p || !p2) { authSetMsg('Please fill in all fields', 'err'); return; }
+  if (p !== p2) { authSetMsg('Passwords do not match', 'err'); return; }
+  authSetMsg('Creating account…', '');
+  authApi({ action: 'register', username: u, password: p }, d => {
+    if (d.success) authOnSuccess(d);
+    else authSetMsg(d.error || 'Registration failed', 'err');
+  });
+}
+
+function authOnSuccess(d) {
+  authUser = d.username;
+  authToken = d.token;
+  localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({ user: authUser, token: authToken }));
+
+  // Merge remote progress into local state if the server has saved data for this account.
+  // d.progress is the Kotoba save object (set via the 'save' action); if it's the old
+  // N5-lessons-shaped progress object instead (from a session restored against the old
+  // site's data), or empty, we just keep what's currently in localStorage.
+  if (d.progress && typeof d.progress === 'object' && 'xp' in d.progress) {
+    try {
+      Object.assign(state, d.progress);
+      localStorage.setItem(SAVE_KEY, JSON.stringify(d.progress));
+    } catch (e) { console.warn('Could not merge remote progress:', e); }
+  }
+
+  authCloseGate();
+  authRefreshUserBar();
+  location.reload(); // re-init cleanly with merged state
+}
+
+function authSkip() {
+  authCloseGate();
+}
+
+function authCloseGate() {
+  const gate = document.getElementById('screen-authgate');
+  if (gate) gate.classList.remove('active');
+}
+
+function authLogout() {
+  authUser = null;
+  authToken = null;
+  localStorage.removeItem(AUTH_SESSION_KEY);
+  authRefreshUserBar();
+  const gate = document.getElementById('screen-authgate');
+  if (gate) { gate.classList.add('active'); authSwitchTab('login'); }
+}
+
+function authRefreshUserBar() {
+  const bar = document.getElementById('user-account-bar');
+  const nameEl = document.getElementById('user-account-name');
+  if (!bar || !nameEl) return;
+  if (authUser) {
+    bar.style.display = 'flex';
+    nameEl.textContent = authUser;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function authSetSyncIndicator(status) {
+  const el = document.getElementById('sync-indicator');
+  if (!el) return;
+  el.className = 'sync-indicator ' + (status || '');
+  if (status === 'syncing') el.textContent = 'Syncing…';
+  else if (status === 'synced') el.textContent = 'Synced';
+  else if (status === 'error') el.textContent = 'Sync failed — saved locally';
+  else el.textContent = '';
+}
+
+// Debounced push to the backend so rapid saves (e.g. mid-lesson) don't spam the API
+function authQueueSync(saveObj) {
+  if (!authUser || !authToken) return;
+  clearTimeout(authSyncTimer);
+  authSyncTimer = setTimeout(() => {
+    authSyncing = true;
+    authSetSyncIndicator('syncing');
+    authApi({ action: 'save', username: authUser, token: authToken, data: JSON.stringify(saveObj) }, d => {
+      authSyncing = false;
+      authSetSyncIndicator(d && d.success ? 'synced' : 'error');
+    });
+  }, 1200);
+}
+
+// Restore an existing session on load (same localStorage key as the old site,
+// so a session created there will also restore here if served from the same origin)
+function authRestoreSession() {
+  const raw = localStorage.getItem(AUTH_SESSION_KEY);
+  if (!raw) return; // no session — auth gate stays up, user can log in or skip
+  let sess;
+  try { sess = JSON.parse(raw); } catch (e) { localStorage.removeItem(AUTH_SESSION_KEY); return; }
+  if (!sess || !sess.user || !sess.token) { localStorage.removeItem(AUTH_SESSION_KEY); return; }
+
+  authSetMsg('Restoring session…', '');
+  authApi({ action: 'progress', username: sess.user, token: sess.token }, d => {
+    if (d.success) {
+      authUser = sess.user;
+      authToken = sess.token;
+      if (d.progress && typeof d.progress === 'object' && 'xp' in d.progress) {
+        try {
+          Object.assign(state, d.progress);
+          localStorage.setItem(SAVE_KEY, JSON.stringify(d.progress));
+        } catch (e) { /* keep local state as-is */ }
+      }
+      authCloseGate();
+      authRefreshUserBar();
+      // Re-render everything now that state may have been merged
+      renderDashboard(); renderCourses(); renderVocab(); renderKana(state.kanaMode || 'hiragana');
+      renderFCSets(); renderReview(); updateXPBar(); updateDashboardStats();
+    } else {
+      localStorage.removeItem(AUTH_SESSION_KEY);
+      authSetMsg('', '');
+    }
+  });
+}
+
+// ════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════
+const saved = loadSave();
+let state = {
+  // persisted
+  xp: saved.xp,
+  level: saved.level,
+  streak: saved.streak,
+  lastStudyDate: saved.lastStudyDate,
+  completedLessons: saved.completedLessons,
+  learnedVocab: saved.learnedVocab,
+  courseProgress: saved.courseProgress,
+  tabletEnabled: saved.tabletEnabled,
+  tabletAdvanced: saved.tabletAdvanced,
+  brushSize: saved.brushSize,
+  theme: saved.theme,
+  showFurigana: saved.showFurigana,
+  showRomaji: saved.showRomaji,
+  keyboardless: saved.keyboardless,
+  dailyGoalMinutes: saved.dailyGoalMinutes,
+  totalStudyMinutes: saved.totalStudyMinutes,
+  accuracy: saved.accuracy,
+  // session-only
+  screen: 'dashboard',
+  hearts: 3,
+  currentLesson: null,
+  currentCourse: null,
+  lessonQuestions: [],
+  lessonQIndex: 0,
+  lessonXP: 0,
+  lessonAnswered: false,
+  lessonStartTime: null,
+  vocabFilter: 'all',
+  kanaMode: 'hiragana',
+  fcSession: null,
+  fcIndex: 0,
+  fcFlipped: false,
+};
+
+// Drawing tablet state
+let canvasCtx = null;
+let drawing = false;
+let drawStrokes = [];
+let currentStroke = [];
+
+// ════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('lesson-screen').classList.remove('active');
+  const el = document.getElementById('screen-' + id);
+  if (el) el.classList.add('active');
+  state.screen = id;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const nav = document.querySelector(`.nav-item[data-screen="${id}"]`);
+  if (nav) nav.classList.add('active');
+  const titles = {
+    dashboard: ['Dashboard', '日本語 — Japanese'],
+    courses: ['Courses', 'All learning paths'],
+    vocabulary: ['Vocabulary', 'N5 · N4 · N3'],
+    kana: ['Kana charts', 'Hiragana & Katakana'],
+    flashcards: ['Flashcards', 'Spaced repetition'],
+    review: ['Review', 'Words due today'],
+    settings: ['Settings', 'Preferences'],
+    'lesson-list': ['Course', ''],
+    'lesson-complete': ['Lesson complete', ''],
+  };
+  const [title, sub] = titles[id] || ['', ''];
+  document.getElementById('topbar-title').textContent = title;
+  document.getElementById('topbar-sub').textContent = sub;
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const btn = document.getElementById('sidebar-toggle');
+  sb.classList.toggle('collapsed');
+  btn.textContent = sb.classList.contains('collapsed') ? '▶' : '◀';
+}
+
+// ════════════════════════════════════════════════
+// RENDER DASHBOARD
+// ════════════════════════════════════════════════
+function renderDashboard() {
+  const active = COURSES.filter(c => !c.locked && c.progress > 0).slice(0, 4);
+  const dash = document.getElementById('dash-courses');
+  dash.innerHTML = active.map(c => courseCardHTML(c)).join('');
+  const wordsets = document.getElementById('dash-wordsets');
+  wordsets.innerHTML = `
+    ${wsetCard('N5 Word Set','800 core words','#22c55e','N5',62)}
+    ${wsetCard('N4 Word Set','1,500 words','#3b82f6','N4',0,true)}
+    ${wsetCard('N3 Word Set','3,750 words','#a78bfa','N3',0,true)}
+  `;
+}
+function wsetCard(title, sub, color, lvl, prog=0, locked=false) {
+  return `<div class="course-card ${locked?'locked':''}" onclick="${locked?'':'openWordSet(\''+lvl+'\')'}">
+    <div class="c-level" style="color:${color}">${lvl} WORD SET</div>
+    <div class="c-title">${title}</div>
+    <div class="c-sub">${sub}</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${prog}%;background:${color}"></div></div>
+    <div class="c-prog">${prog}% complete</div>
+    ${locked?'<span class="lock-icon">🔒</span>':''}
+  </div>`;
+}
+
+function renderCourses() {
+  document.getElementById('all-courses').innerHTML = COURSES.map(c => courseCardHTML(c)).join('');
+}
+function courseCardHTML(c) {
+  return `<div class="course-card ${c.color} ${c.locked?'locked':''}" onclick="${c.locked?'':'openCourse(\''+c.id+'\')'}">
+    <div class="c-level">${c.level}</div>
+    <div class="c-title">${c.title}</div>
+    <div class="c-sub">${c.sub}</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${c.progress}%"></div></div>
+    <div class="c-prog">${c.lessons} lessons · ${c.progress}% complete</div>
+    ${c.locked?'<span class="lock-icon">🔒</span>':''}
+  </div>`;
+}
+
+function openCourse(id) {
+  const course = COURSES.find(c => c.id === id);
+  if (!course || course.locked) return;
+  state.currentCourse = course;
+  document.getElementById('lesson-list-title').textContent = course.title;
+  document.getElementById('lesson-list-sub').textContent = course.sub;
+  const ul = document.getElementById('lesson-list-content');
+  ul.innerHTML = course.lessons_data.map((l, i) => `
+    <div class="lesson-row ${l.status}" onclick="${l.status==='locked'?'':'startLesson(\''+l.id+'\',\''+id+'\')'}">
+      <div class="lesson-num">${l.status==='completed'?'✓':i+1}</div>
+      <div class="lesson-info">
+        <div class="l-title">${l.title}</div>
+        <div class="l-sub">${l.sub}</div>
+      </div>
+      <div class="lesson-meta">
+        <span class="lesson-tag">${l.type}</span>
+        <span class="lesson-xp">+${l.xp} XP</span>
+        ${l.status==='locked'?'<span>🔒</span>':''}
+      </div>
+    </div>
+  `).join('');
+  showScreen('lesson-list');
+  document.getElementById('topbar-title').textContent = course.title;
+}
+
+function openWordSet(lvl) {
+  alert('Word set for ' + lvl + ' — coming soon!');
+}
+
+// ════════════════════════════════════════════════
+// VOCABULARY
+// ════════════════════════════════════════════════
+function renderVocab(filter='all', search='') {
+  let list = VOCAB;
+  if (filter === 'learned') list = list.filter(v => v.learned);
+  else if (filter !== 'all') list = list.filter(v => v.level === filter);
+  if (search) {
+    search = search.toLowerCase();
+    list = list.filter(v => v.jp.includes(search) || v.read.toLowerCase().includes(search) || v.en.toLowerCase().includes(search));
+  }
+  const levelColors = { N5:'#22c55e', N4:'#3b82f6', N3:'#a78bfa' };
+  document.getElementById('vocab-grid').innerHTML = list.map(v => `
+    <div class="vocab-card">
+      <div class="v-jp">${v.jp}</div>
+      <div class="v-reading">${v.read}</div>
+      <div class="v-en">${v.en}</div>
+      <span class="v-level" style="background:${levelColors[v.level]}22;color:${levelColors[v.level]}">${v.level}</span>
+    </div>
+  `).join('');
+}
+function filterVocab(f, el) {
+  state.vocabFilter = f;
+  document.querySelectorAll('#screen-vocabulary .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderVocab(f, document.getElementById('vocab-search').value);
+}
+function filterVocabSearch(v) {
+  renderVocab(state.vocabFilter, v);
+}
+
+// ════════════════════════════════════════════════
+// KANA CHARTS
+// ════════════════════════════════════════════════
+function renderKana(mode='hiragana') {
+  const data = mode === 'hiragana' ? HIRAGANA : KATAKANA;
+  document.getElementById('kana-section-label').textContent = mode === 'hiragana' ? 'Basic hiragana' : 'Basic katakana';
+  document.getElementById('kana-grid').innerHTML = data.map(k => `
+    <div class="kana-cell" onclick="playKana('${k.c}')">
+      <span class="k-char">${k.c}</span>
+      <span class="k-rom">${k.r}</span>
+    </div>
+  `).join('');
+}
+function switchKana(mode, el) {
+  state.kanaMode = mode;
+  document.querySelectorAll('#screen-kana .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderKana(mode);
+}
+function playKana(char) {
+  if ('speechSynthesis' in window) {
+    const u = new SpeechSynthesisUtterance(char);
+    u.lang = 'ja-JP'; u.rate = 0.8;
+    speechSynthesis.speak(u);
+  }
+}
+
+// ════════════════════════════════════════════════
+// LESSON ENGINE
+// ════════════════════════════════════════════════
+// ════════════════════════════════════════════════
+// KANA LESSON GENERATOR
+// Produces the full standardized question sequence for a row of
+// kana: for each character — match-to-romaji, match-romaji-to-kana,
+// type romaji, type kana — followed by one matching round covering
+// the whole set. Keyboardless fallbacks are handled automatically
+// by renderQuestion (type-answer / type-kana check state.keyboardless).
+// ════════════════════════════════════════════════
+function buildKanaLesson(chars, kanaTypeLabel, fullSetOverride) {
+  // chars: array of {c, r} for this lesson's characters only
+  // kanaTypeLabel: 'hiragana' | 'katakana' (also used for display text)
+  // fullSetOverride: optional — the full character pool to draw distractors from
+  //   (defaults to the base HIRAGANA/KATAKANA set; pass a dakuten array to keep
+  //   dakuten lessons drawing distractors only from other dakuten characters)
+  const fullSet = fullSetOverride || (kanaTypeLabel === 'katakana' ? KATAKANA : HIRAGANA);
+  const displayLabel = kanaTypeLabel === 'katakana' ? 'katakana' : 'hiragana';
+  const questions = [];
+
+  chars.forEach(({c, r}) => {
+    const otherChars = fullSet.filter(k => k.c !== c);
+
+    // 1. Match character to romaji (multiple choice)
+    const romDistractors = shuffle(otherChars).slice(0,3).map(k => k.r);
+    questions.push({
+      type: 'kana-intro',
+      char: c, rom: r,
+      question: 'What is the reading of this character?',
+      options: shuffle([r, ...romDistractors]),
+      answer: r,
+    });
+
+    // 2. Match romaji to character (multiple choice)
+    const charDistractors = shuffle(otherChars).slice(0,3).map(k => k.c);
+    questions.push({
+      type: 'kana-select',
+      prompt: `Which character reads as "${r}"?`,
+      options: shuffle([c, ...charDistractors]),
+      answer: c,
+    });
+
+    // 3. Type the romaji (becomes word-bank tiles in keyboardless mode)
+    questions.push({
+      type: 'type-answer',
+      char: c,
+      question: 'Type the romaji for this character',
+      answer: r,
+      placeholder: 'Type romaji...',
+    });
+
+    // 4. Type the character itself (becomes kana-tile picker in keyboardless mode)
+    questions.push({
+      type: 'type-kana',
+      rom: r,
+      answer: c,
+      kanaSet: kanaTypeLabel,
+      kanaPool: fullSet,
+    });
+
+    // 5. Writing practice on the drawing tablet (only renders when tablet is on;
+    //    falls back to a recognition MCQ automatically when it's off)
+    questions.push({
+      type: 'write-kana',
+      char: c, rom: r,
+      question: `Write the ${displayLabel} for "${r}"`,
+      useTablet: true,
+      kanaPool: fullSet,
+    });
+  });
+
+  // 6. Matching round covering every character taught in this lesson
+  questions.push({
+    type: 'matching',
+    prompt: `Match each ${displayLabel} character to its romaji`,
+    leftLabel: kanaTypeLabel === 'katakana' ? 'Katakana' : 'Hiragana',
+    rightLabel: 'Romaji',
+    pairs: chars.map(({c,r}) => ({ left: c, right: r })),
+  });
+
+  return questions;
+}
+
+const QUESTION_BANKS = {
+  // ── Hiragana lessons — full standardized sequence per character ──
+  'h1': buildKanaLesson(HIRAGANA.slice(0,5), 'hiragana'),    // あいうえお
+  'h2': buildKanaLesson(HIRAGANA.slice(5,10), 'hiragana'),   // かきくけこ
+  'h3': buildKanaLesson(HIRAGANA.slice(10,15), 'hiragana'),  // さしすせそ
+  'h4': buildKanaLesson(HIRAGANA.slice(15,20), 'hiragana'),  // たちつてと
+  'h5': buildKanaLesson(HIRAGANA.slice(20,25), 'hiragana'),  // なにぬねの
+  'h6': buildKanaLesson(HIRAGANA.slice(25,30), 'hiragana'),  // はひふへほ
+  'h7': buildKanaLesson(HIRAGANA.slice(30,35), 'hiragana'),  // まみむめも
+  'h8': buildKanaLesson(HIRAGANA.slice(35,43), 'hiragana'),  // やゆよ + らりるれろ
+  'h9': buildKanaLesson(HIRAGANA.slice(43,46), 'hiragana'),  // わをん
+
+  // ── Katakana lessons ──────────────────────────────────────
+  // ── Katakana lessons — full standardized sequence per character ──
+  'k1': buildKanaLesson(KATAKANA.slice(0,5), 'katakana'),    // アイウエオ
+  'k2': buildKanaLesson(KATAKANA.slice(5,10), 'katakana'),   // カキクケコ
+  'k3': buildKanaLesson(KATAKANA.slice(10,15), 'katakana'),  // サシスセソ
+  'k4': buildKanaLesson(KATAKANA.slice(15,20), 'katakana'),  // タチツテト
+  'k5': buildKanaLesson(KATAKANA.slice(20,25), 'katakana'),  // ナニヌネノ
+  'k6': buildKanaLesson(KATAKANA.slice(25,30), 'katakana'),  // ハヒフヘホ
+  'k7': buildKanaLesson(KATAKANA.slice(30,35), 'katakana'),  // マミムメモ
+  'k8': buildKanaLesson(KATAKANA.slice(35,43), 'katakana'),  // ヤユヨ + ラリルレロ
+  'k9': buildKanaLesson(KATAKANA.slice(43,46), 'katakana'),  // ワヲン
+
+  // ── Hiragana dakuten/handakuten — second path, every voiced sound ──
+  'hd1': buildKanaLesson(HIRAGANA_DAKUTEN.slice(0,5), 'hiragana', HIRAGANA_DAKUTEN),   // がぎぐげご
+  'hd2': buildKanaLesson(HIRAGANA_DAKUTEN.slice(5,10), 'hiragana', HIRAGANA_DAKUTEN),  // ざじずぜぞ
+  'hd3': buildKanaLesson(HIRAGANA_DAKUTEN.slice(10,15), 'hiragana', HIRAGANA_DAKUTEN), // だぢづでど
+  'hd4': buildKanaLesson(HIRAGANA_DAKUTEN.slice(15,20), 'hiragana', HIRAGANA_DAKUTEN), // ばびぶべぼ
+  'hd5': buildKanaLesson(HIRAGANA_DAKUTEN.slice(20,25), 'hiragana', HIRAGANA_DAKUTEN), // ぱぴぷぺぽ
+
+  // ── Katakana dakuten/handakuten ──────────────────────────────────
+  'kd1': buildKanaLesson(KATAKANA_DAKUTEN.slice(0,5), 'katakana', KATAKANA_DAKUTEN),   // ガギグゲゴ
+  'kd2': buildKanaLesson(KATAKANA_DAKUTEN.slice(5,10), 'katakana', KATAKANA_DAKUTEN),  // ザジズゼゾ
+  'kd3': buildKanaLesson(KATAKANA_DAKUTEN.slice(10,15), 'katakana', KATAKANA_DAKUTEN), // ダヂヅデド
+  'kd4': buildKanaLesson(KATAKANA_DAKUTEN.slice(15,20), 'katakana', KATAKANA_DAKUTEN), // バビブベボ
+  'kd5': buildKanaLesson(KATAKANA_DAKUTEN.slice(20,25), 'katakana', KATAKANA_DAKUTEN), // パピプペポ
+
+  // ── Hiragana yōon (combination kana) ──────────────────────────────
+  'hy1': buildKanaLesson(HIRAGANA_YOON.slice(0,9), 'hiragana', HIRAGANA_YOON),    // きゃ-row, しゃ-row, ちゃ-row
+  'hy2': buildKanaLesson(HIRAGANA_YOON.slice(9,15), 'hiragana', HIRAGANA_YOON),   // にゃ-row, ひゃ-row
+  'hy3': buildKanaLesson(HIRAGANA_YOON.slice(15,21), 'hiragana', HIRAGANA_YOON),  // みゃ-row, りゃ-row
+  'hy4': buildKanaLesson(HIRAGANA_YOON_DAKUTEN, 'hiragana', HIRAGANA_YOON_DAKUTEN), // ぎゃ、じゃ、ぢゃ、びゃ、ぴゃ (voiced)
+
+  // ── Katakana yōon (combination kana) ──────────────────────────────
+  'ky1': buildKanaLesson(KATAKANA_YOON.slice(0,9), 'katakana', KATAKANA_YOON),    // キャ-row, シャ-row, チャ-row
+  'ky2': buildKanaLesson(KATAKANA_YOON.slice(9,15), 'katakana', KATAKANA_YOON),   // ニャ-row, ヒャ-row
+  'ky3': buildKanaLesson(KATAKANA_YOON.slice(15,21), 'katakana', KATAKANA_YOON),  // ミャ-row, リャ-row
+  'ky4': buildKanaLesson(KATAKANA_YOON_DAKUTEN, 'katakana', KATAKANA_YOON_DAKUTEN), // ギャ、ジャ、ヂャ、ビャ、ピャ (voiced)
+
+  'b1': [
+    { type:'vocab-mcq', jp:'こんにちは', read:'konnichiwa', question:'What does this mean?', options:['Good morning','Hello','Goodbye','Thank you'], answer:'Hello' },
+    { type:'vocab-mcq', jp:'ありがとう', read:'arigatou', question:'What does this mean?', options:['Sorry','Hello','Thank you','Please'], answer:'Thank you' },
+    { type:'vocab-mcq', jp:'おはよう', read:'ohayou', question:'What does this mean?', options:['Good afternoon','Good evening','Good morning','Goodbye'], answer:'Good morning' },
+    { type:'vocab-type', en:'Excuse me / Sorry', jp:'すみません', question:'Type the Japanese for:', placeholder:'Romaji or Japanese...', answer:'すみません', alt:['sumimasen'] },
+    { type:'vocab-mcq', jp:'さようなら', read:'sayounara', question:'What does this mean?', options:['Hello','Thank you','Yes','Goodbye'], answer:'Goodbye' },
+    { type:'vocab-mcq', jp:'はい', read:'hai', question:'What does this mean?', options:['No','Maybe','Yes','Please'], answer:'Yes' },
+    { type:'vocab-type', en:'No', jp:'いいえ', question:'Type the Japanese for:', placeholder:'Romaji or Japanese...', answer:'いいえ', alt:['iie'] },
+    { type:'matching', prompt:'Match each Japanese word to its meaning', leftLabel:'Japanese', rightLabel:'Meaning',
+      pairs:[
+        { left:'こんにちは', right:'Hello' },
+        { left:'ありがとう', right:'Thank you' },
+        { left:'おはよう', right:'Good morning' },
+        { left:'さようなら', right:'Goodbye' },
+        { left:'はい', right:'Yes' },
+      ]
+    },
+  ],
+  'b3': [
+    { type:'vocab-mcq', jp:'じゅういち', read:'juuichi', question:'What number is this?', options:['10','11','12','20'], answer:'11' },
+    { type:'vocab-mcq', jp:'にじゅう', read:'nijuu', question:'What number is this?', options:['12','20','22','2'], answer:'20' },
+    { type:'vocab-mcq', jp:'ひゃく', read:'hyaku', question:'What number is this?', options:['10','100','1000','50'], answer:'100' },
+    { type:'vocab-type', en:'50', jp:'ごじゅう', question:'Write the Japanese for:', placeholder:'Japanese or romaji...', answer:'ごじゅう', alt:['gojuu','50'] },
+    { type:'vocab-mcq', jp:'さんじゅう', read:'sanjuu', question:'What number?', options:['13','30','33','300'], answer:'30' },
+    { type:'matching', prompt:'Match each Japanese number to its value', leftLabel:'Japanese', rightLabel:'Number',
+      pairs:[
+        { left:'じゅういち', right:'11' },
+        { left:'にじゅう', right:'20' },
+        { left:'ひゃく', right:'100' },
+        { left:'ごじゅう', right:'50' },
+        { left:'さんじゅう', right:'30' },
+      ]
+    },
+  ],
+  'g1': [
+    { type:'grammar-mcq', sentence:'これは本___。', blank:'___', question:'Complete with the correct polite ending:', options:['だ','です','は','が'], answer:'です', note:'です is the polite copula meaning "is/am/are". Use it in formal situations.' },
+    { type:'grammar-mcq', sentence:'私は学生___。', blank:'___', question:'Choose the correct ending:', options:['です','ます','か','に'], answer:'です', note:'After a noun, use です for polite speech.' },
+    { type:'grammar-mcq', sentence:'食べ___。', blank:'___', question:'Choose the polite verb form:', options:['だ','ます','です','は'], answer:'ます', note:'ます is used to form the polite present/future tense of verbs.' },
+    { type:'grammar-mcq', sentence:'これは本ですか？', blank:null, question:'What does this sentence ask?', options:['This is a book.','Is this a book?','I have a book.','Buy a book.'], answer:'Is this a book?', note:'Adding か at the end makes a sentence a question in Japanese.' },
+  ],
+  'review-session': buildReviewSession(),
+
+  // ── Sentence building lessons ────────────────────────────
+  'sb-greetings': [
+    {
+      type:'sentence-build',
+      prompt:'Arrange into Japanese: "Good morning, I am Caleb."',
+      en:'Good morning, I am Caleb.',
+      answer:['おはよう','、','わたし','は','カレブ','です','。'],
+      bank:['おはよう','、','わたし','は','カレブ','です','。','ありがとう','いいえ'],
+      note:'おはよう (good morning) + わたしは (I am) + です (polite "is")'
+    },
+    {
+      type:'sentence-build',
+      prompt:'Arrange into Japanese: "Is this a book?"',
+      en:'Is this a book?',
+      answer:['これ','は','ほん','です','か','？'],
+      bank:['これ','は','ほん','です','か','？','あれ','が'],
+      note:'これは = "this is", ほん = book, か makes it a question'
+    },
+    {
+      type:'sentence-build',
+      prompt:'Arrange into Japanese: "Thank you very much."',
+      en:'Thank you very much.',
+      answer:['どうも','ありがとう','ございます','。'],
+      bank:['どうも','ありがとう','ございます','。','おはよう','さようなら'],
+      note:'どうも ありがとう ございます — the most formal thank you'
+    },
+    {
+      type:'word-bank',
+      prompt:'Choose the Japanese word for "Goodbye"',
+      en:'Goodbye',
+      options:['さようなら','おはよう','ありがとう','すみません'],
+      answer:'さようなら',
+    },
+    {
+      type:'sentence-build',
+      prompt:'Arrange into Japanese: "I don\'t understand."',
+      en:"I don't understand.",
+      answer:['わかり','ません','。'],
+      bank:['わかり','ません','。','はい','です','か'],
+      note:'わかりません — polite negative of わかる (to understand)'
+    },
+    {
+      type:'sentence-build',
+      prompt:'Arrange into Japanese: "Excuse me, where is the station?"',
+      en:'Excuse me, where is the station?',
+      answer:['すみません','、','えき','は','どこ','です','か','？'],
+      bank:['すみません','、','えき','は','どこ','です','か','？','これ','ほん'],
+      note:'すみません = excuse me, えき = station, どこ = where'
+    },
+  ],
+  'sb-numbers': [
+    {
+      type:'word-bank',
+      prompt:'Choose the Japanese for "three"',
+      en:'Three',
+      options:['に','さん','し','ご'],
+      answer:'さん',
+    },
+    {
+      type:'word-bank',
+      prompt:'Choose the Japanese for "seven"',
+      en:'Seven',
+      options:['ろく','なな','はち','く'],
+      answer:'なな',
+    },
+    {
+      type:'sentence-build',
+      prompt:'Arrange: "There are three cats."',
+      en:'There are three cats.',
+      answer:['ねこ','が','さんびき','います','。'],
+      bank:['ねこ','が','さんびき','います','。','いぬ','に','ひとつ'],
+      note:'ねこ = cat, さんびき = three (animals counter), います = there are'
+    },
+    {
+      type:'sentence-build',
+      prompt:'Arrange: "The train arrives at 10 o\'clock."',
+      en:"The train arrives at 10 o'clock.",
+      answer:['でんしゃ','は','じゅうじ','に','きます','。'],
+      bank:['でんしゃ','は','じゅうじ','に','きます','。','が','いきます','さんじ'],
+      note:'でんしゃ = train, じゅうじ = 10 o\'clock, に = at (time), きます = arrives'
+    },
+    {
+      type:'word-bank',
+      prompt:'Choose the Japanese for "100"',
+      en:'One hundred',
+      options:['じゅう','にじゅう','ひゃく','せん'],
+      answer:'ひゃく',
+    },
+  ],
+  'sb-grammar': [
+    {
+      type:'sentence-build',
+      prompt:'Arrange: "I eat sushi."',
+      en:'I eat sushi.',
+      answer:['わたし','は','すし','を','たべます','。'],
+      bank:['わたし','は','すし','を','たべます','。','が','のみます','それ'],
+      note:'を marks the object (sushi), たべます = eat (polite)'
+    },
+    {
+      type:'sentence-build',
+      prompt:'Arrange: "She goes to school."',
+      en:'She goes to school.',
+      answer:['かのじょ','は','がっこう','に','いきます','。'],
+      bank:['かのじょ','は','がっこう','に','いきます','。','を','きます','かれ'],
+      note:'に marks direction/destination, いきます = go (polite)'
+    },
+    {
+      type:'word-bank',
+      prompt:'Which particle marks the topic of a sentence?',
+      en:'Topic marker particle',
+      options:['を','に','は','が'],
+      answer:'は',
+      note:'は (wa) is the topic marker. が (ga) is the subject marker — subtle but different!'
+    },
+    {
+      type:'sentence-build',
+      prompt:'Arrange: "I want to drink water."',
+      en:'I want to drink water.',
+      answer:['みず','を','のみ','たい','です','。'],
+      bank:['みず','を','のみ','たい','です','。','は','たべ','か'],
+      note:'〜たいです = want to do something. のみ + たい = want to drink'
+    },
+    {
+      type:'sentence-build',
+      prompt:'Arrange: "This is not a car."',
+      en:'This is not a car.',
+      answer:['これ','は','くるま','では','ありません','。'],
+      bank:['これ','は','くるま','では','ありません','。','です','か','それ'],
+      note:'では ありません = is not (polite negative)'
+    },
+    {
+      type:'word-bank',
+      prompt:'Which particle marks the object of an action?',
+      en:'Object marker particle',
+      options:['は','に','で','を'],
+      answer:'を',
+      note:'を (wo) marks what the verb acts on. "I eat sushi" → すしをたべます'
+    },
+  ],
+};
+function buildReviewSession() {
+  return VOCAB.filter(v => !v.learned).slice(0,8).map(v => ({
+    type:'vocab-mcq',
+    jp: v.jp,
+    read: v.read,
+    question: 'What does this mean?',
+    options: shuffle([v.en, ...VOCAB.filter(x=>x.en!==v.en).map(x=>x.en).slice(0,3)]),
+    answer: v.en
+  }));
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function startLesson(lessonId, courseId) {
+  let lesson = null;
+  if (courseId) {
+    const course = COURSES.find(c => c.id === courseId);
+    lesson = course?.lessons_data.find(l => l.id === lessonId);
+  }
+  const qs = QUESTION_BANKS[lessonId] || buildGenericQuestions(lessonId);
+  state.currentLesson = { id:lessonId, lesson, courseId };
+  state.lessonQuestions = shuffle([...qs]);
+  state.lessonQIndex = 0;
+  state.lessonXP = 0;
+  state.hearts = 3;
+  state.lessonAnswered = false;
+  state.lessonStartTime = Date.now();
+  wbTrayWords = [];
+  matchState = null;
+  renderHearts();
+  document.getElementById('lesson-progress').style.width = '0%';
+  document.getElementById('lesson-xp-display').textContent = '0';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const ls = document.getElementById('lesson-screen');
+  ls.classList.add('active');
+  document.getElementById('feedback-bar').classList.remove('show','correct-fb','wrong-fb');
+  renderQuestion();
+}
+
+function buildGenericQuestions(id) {
+  return VOCAB.slice(0,5).map(v => ({
+    type:'vocab-mcq', jp:v.jp, read:v.read,
+    question:'What does this mean?',
+    options: shuffle([v.en,...VOCAB.filter(x=>x.en!==v.en).slice(0,3).map(x=>x.en)]),
+    answer:v.en
+  }));
+}
+
+function renderQuestion() {
+  const total = state.lessonQuestions.length;
+  const pct = Math.round((state.lessonQIndex / total) * 100);
+  document.getElementById('lesson-progress').style.width = pct + '%';
+  if (state.lessonQIndex >= total) { finishLesson(); return; }
+  const q = state.lessonQuestions[state.lessonQIndex];
+  state.lessonAnswered = false;
+  document.getElementById('feedback-bar').classList.remove('show','correct-fb','wrong-fb');
+  const useTabletHere = state.tabletEnabled && (state.tabletAdvanced || q.useTablet);
+
+  let html = '';
+  if (q.type === 'kana-intro' || q.type === 'write-kana') {
+    const isWritingNow = q.type==='write-kana' && useTabletHere;
+    const fallbackQuestion = (q.type==='write-kana' && !useTabletHere) ? 'What is the reading of this character?' : q.question;
+    html = `
+      <div class="q-type-label">${isWritingNow?'Writing practice':'Kana recognition'}</div>
+      <div class="q-main">${q.char}</div>
+      ${isWritingNow?`<div class="q-furigana">${q.rom}</div>`:''}
+      <div class="q-prompt">${fallbackQuestion}</div>
+    `;
+    if (!useTabletHere) {
+      if (q.options && q.options.length) {
+        html += `<div class="answer-grid">` + q.options.map(o=>`
+          <button class="answer-btn" onclick="checkAnswer('${o}','${q.answer}',this)">${o}</button>
+        `).join('') + `</div>`;
+      } else {
+        // write-kana with the tablet off: there's no way to test writing without
+        // a tablet, so fall back to a multiple-choice recognition check instead
+        // of a typed answer (typing the romaji would trivially match q.rom).
+        const kanaSet = q.kanaPool || ((q.char && /[\u30A0-\u30FF]/.test(q.char)) ? KATAKANA : HIRAGANA);
+        const distractorPool = kanaSet.filter(k => k.r !== q.rom);
+        const distractors = shuffle(distractorPool).slice(0,3).map(k => k.r);
+        const mcOptions = shuffle([q.rom, ...distractors]);
+        html += `
+          <div class="answer-grid">` + mcOptions.map(o=>`
+            <button class="answer-btn" onclick="checkAnswer('${o}','${q.rom}',this)">${o}</button>
+          `).join('') + `</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:4px">Turn on the drawing tablet to practice writing this character</div>`;
+      }
+    }
+  } else if (q.type === 'type-kana') {
+    // Type/select the actual kana character, given the romaji
+    const kanaSet = q.kanaPool || (q.kanaSet === 'katakana' ? KATAKANA : HIRAGANA);
+    if (state.keyboardless) {
+      const distractorPool = kanaSet.filter(k => k.c !== q.answer);
+      const distractors = shuffle(distractorPool).slice(0,3).map(k => k.c);
+      const options = shuffle([q.answer, ...distractors]);
+      html = `
+        <div class="q-type-label">Word selection</div>
+        <div class="q-prompt">Tap the ${q.kanaSet === 'katakana' ? 'katakana' : 'hiragana'} for: <strong>${q.rom}</strong></div>
+        <div class="wb-bank" id="wb-bank" style="margin-top:16px">
+          ${options.map((o,i)=>`
+            <button class="wb-chip" id="wbc-${i}" onclick="selectWordChip('${o}','${q.answer}',this)" style="font-size:24px">${o}</button>
+          `).join('')}
+        </div>
+      `;
+    } else {
+      html = `
+        <div class="q-type-label">Type the character</div>
+        <div class="q-prompt">Type the ${q.kanaSet === 'katakana' ? 'katakana' : 'hiragana'} for: <strong>${q.rom}</strong></div>
+        <div class="type-input-wrap">
+          <input class="type-input" id="type-inp" placeholder="Type the character..." autofocus>
+          <button class="btn primary" onclick="checkTyped()" style="padding:10px 32px">Check</button>
+        </div>
+      `;
+    }
+  } else if (q.type === 'kana-select') {
+    html = `
+      <div class="q-type-label">Kana recognition</div>
+      <div class="q-main roman">${q.prompt}</div>
+      <div class="answer-grid">` + (q.options||[]).map(o=>`
+        <button class="answer-btn" onclick="checkAnswer('${o}','${q.answer}',this)" style="font-size:28px">${o}</button>
+      `).join('') + `</div>`;
+  } else if (q.type === 'type-answer' || q.type === 'vocab-type') {
+    const isVocab = q.type === 'vocab-type';
+    // In keyboardless mode, replace typing with word-bank chips
+    if (state.keyboardless) {
+      const answerVal = q.answer ?? q.rom ?? '';
+      const correctAnswers = [answerVal, ...(q.alt||[])];
+      const distractors = VOCAB
+        .filter(v => !correctAnswers.includes(v.jp) && !correctAnswers.includes(v.read) && !correctAnswers.includes(v.en))
+        .map(v => isVocab ? v.jp : v.read)
+        .filter((v,i,a)=>a.indexOf(v)===i)
+        .slice(0,3);
+      const options = shuffle([answerVal, ...distractors]);
+      const promptLabel = isVocab
+        ? `Tap the Japanese for: <strong>${q.en||''}</strong>`
+        : `Tap the romaji for: `;
+      html = `
+        <div class="q-type-label">Word selection</div>
+        ${!isVocab?`<div class="q-main">${q.char||''}</div>`:''}
+        <div class="q-prompt">${promptLabel}</div>
+        <div class="wb-bank" id="wb-bank" style="margin-top:16px">
+          ${options.map((o,i)=>`
+            <button class="wb-chip" id="wbc-${i}" onclick="selectWordChip('${o.replace(/'/g,"\\'")}','${answerVal.replace(/'/g,"\\'")}',this)">${o}</button>
+          `).join('')}
+        </div>
+      `;
+    } else {
+      html = `
+        <div class="q-type-label">Type the answer</div>
+        ${isVocab?`<div class="q-prompt">English: <strong>${q.en || ''}</strong></div>`:`<div class="q-main">${q.char||''}</div>`}
+        <div class="q-prompt">${q.question}</div>
+        <div class="type-input-wrap">
+          <input class="type-input" id="type-inp" placeholder="${q.placeholder||'Type answer...'}" autofocus>
+          <button class="btn primary" onclick="checkTyped()" style="padding:10px 32px">Check</button>
+        </div>
+      `;
+    }
+  } else if (q.type === 'vocab-mcq') {
+    html = `
+      <div class="q-type-label">Vocabulary</div>
+      <div class="q-main">${q.jp}</div>
+      <div class="q-furigana">${q.read}</div>
+      <div class="q-prompt">${q.question}</div>
+      <div class="answer-grid">` + (q.options||[]).map(o=>`
+        <button class="answer-btn" onclick="checkAnswer('${o.replace(/'/g,"\\'")}','${q.answer.replace(/'/g,"\\'")}',this)">
+          ${o}
+        </button>
+      `).join('') + `</div>`;
+  } else if (q.type === 'grammar-mcq') {
+    html = `
+      <div class="q-type-label">Grammar</div>
+      <div class="q-main small">${q.sentence}</div>
+      <div class="q-prompt">${q.question}</div>
+      <div class="answer-grid">` + (q.options||[]).map(o=>`
+        <button class="answer-btn" onclick="checkAnswer('${o}','${q.answer}',this)" style="font-size:20px">${o}</button>
+      `).join('') + `</div>`;
+  } else if (q.type === 'word-bank') {
+    // Single-word selection from tiles — keyboardless replacement for vocab-type
+    const shuffled = shuffle([...(q.options||[])]);
+    html = `
+      <div class="q-type-label">Word selection</div>
+      <div class="q-prompt" style="font-size:17px;font-weight:500;margin-bottom:4px">${q.prompt}</div>
+      ${q.en?`<div class="q-furigana" style="font-size:14px;color:var(--text2)">English: <strong>${q.en}</strong></div>`:''}
+      <div class="wb-bank" id="wb-bank" style="margin-top:16px">
+        ${shuffled.map((o,i)=>`
+          <button class="wb-chip" id="wbc-${i}" onclick="selectWordChip('${o.replace(/'/g,"\\'")}','${q.answer.replace(/'/g,"\\'")}',this)">${o}</button>
+        `).join('')}
+      </div>
+    `;
+  } else if (q.type === 'sentence-build') {
+    const shuffledBank = shuffle([...(q.bank||[])]);
+    html = `
+      <div class="q-type-label">Build the sentence</div>
+      <div class="q-prompt" style="font-size:15px;font-weight:500">${q.prompt}</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px;margin-bottom:16px">Tap words in order — tap a word in the answer to remove it</div>
+      <div class="wb-answer-tray" id="wb-tray">
+        <span class="wb-placeholder" id="wb-placeholder">Tap words below to build your answer...</span>
+      </div>
+      <div class="wb-divider"></div>
+      <div class="wb-bank" id="wb-bank">
+        ${shuffledBank.map((w,i)=>`
+          <button class="wb-chip" id="wbc-${i}" data-word="${w.replace(/"/g,'&quot;')}" data-idx="${i}" onclick="addWordToTray(this)">${w}</button>
+        `).join('')}
+      </div>
+      <div class="wb-check-row">
+        <button class="btn primary" onclick="checkSentence()" style="padding:9px 28px">Check</button>
+      </div>
+    `;
+  } else if (q.type === 'matching') {
+    const leftShuffled = shuffle(q.pairs.map((p,i)=>({ ...p, pairIdx:i })));
+    const rightShuffled = shuffle(q.pairs.map((p,i)=>({ ...p, pairIdx:i })));
+    matchState = { pairs: q.pairs, matchedCount: 0, selectedLeft: null, selectedRight: null, total: q.pairs.length };
+    html = `
+      <div class="q-type-label">Matching</div>
+      <div class="q-prompt" style="margin-bottom:8px">${q.prompt || 'Match each item to its pair'}</div>
+      <div class="match-columns">
+        <div class="match-col" id="match-left-col">
+          <div class="match-col-label">${q.leftLabel || 'Characters'}</div>
+          ${leftShuffled.map((p,i)=>`
+            <div class="match-item" data-pair="${p.pairIdx}" data-side="left" onclick="matchSelect(this)">${p.left}</div>
+          `).join('')}
+        </div>
+        <div class="match-col" id="match-right-col">
+          <div class="match-col-label">${q.rightLabel || 'Readings'}</div>
+          ${rightShuffled.map((p,i)=>`
+            <div class="match-item right-col" data-pair="${p.pairIdx}" data-side="right" onclick="matchSelect(this)">${p.right}</div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="match-progress-text" id="match-progress">0 / ${q.pairs.length} matched</div>
+    `;
+  } else {
+    // Unknown question type — skip it
+    console.warn('Unknown question type:', q.type, q);
+    nextQuestion();
+    return;
+  }
+  document.getElementById('lesson-body').innerHTML = `<div class="question-card">${html}</div>`;
+
+  // Auto-focus type input
+  setTimeout(()=>{
+    const inp = document.getElementById('type-inp');
+    if (inp) { inp.focus(); inp.onkeydown = e=>{ if(e.key==='Enter') checkTyped(); }; }
+  }, 50);
+
+  // Drawing tablet
+  const tabletOverlay = document.getElementById('tablet-overlay');
+  if (useTabletHere) {
+    document.getElementById('tablet-label-text').textContent = `Write: ${q.char||q.jp||''}`;
+    tabletOverlay.classList.add('visible');
+    initCanvas();
+    document.getElementById('tablet-result').innerHTML = '';
+  } else {
+    tabletOverlay.classList.remove('visible');
+  }
+}
+
+function checkAnswer(selected, correct, btn) {
+  if (state.lessonAnswered) return;
+  state.lessonAnswered = true;
+  document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
+  const isCorrect = selected === correct;
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    document.querySelectorAll('.answer-btn').forEach(b => {
+      if (b.textContent.trim() === correct) b.classList.add('reveal');
+    });
+    loseHeart();
+  }
+  showFeedback(isCorrect, correct);
+}
+
+function checkTyped() {
+  if (state.lessonAnswered) return;
+  const inp = document.getElementById('type-inp');
+  const q = state.lessonQuestions[state.lessonQIndex];
+  // write-kana uses q.rom as the correct answer; others use q.answer
+  const correctRaw = q.answer ?? q.rom ?? '';
+  const val = inp.value.trim().toLowerCase();
+  const correct = correctRaw.toLowerCase();
+  const alts = (q.alt||[]).map(a=>a.toLowerCase());
+  const isCorrect = val === correct || alts.includes(val);
+  state.lessonAnswered = true;
+  inp.classList.add(isCorrect ? 'correct' : 'wrong');
+  inp.disabled = true;
+  if (!isCorrect) loseHeart();
+  showFeedback(isCorrect, correctRaw);
+}
+
+function showFeedback(correct, correctAnswer) {
+  const q = state.lessonQuestions[state.lessonQIndex];
+  const bar = document.getElementById('feedback-bar');
+  const btn = document.getElementById('fb-btn');
+  document.getElementById('fb-icon').textContent = correct ? '✅' : '❌';
+  document.getElementById('fb-title').textContent = correct ? 'Correct!' : 'Incorrect';
+  let sub = correct ? '' : `Correct answer: ${correctAnswer}`;
+  if (q.note) sub = q.note;
+  document.getElementById('fb-sub').textContent = sub;
+  bar.classList.remove('correct-fb','wrong-fb');
+  bar.classList.add('show', correct ? 'correct-fb' : 'wrong-fb');
+  btn.className = 'fb-btn ' + (correct ? 'continue-correct' : 'continue-wrong');
+  btn.textContent = 'Continue';
+  if (correct) {
+    const xpGain = 10;
+    state.lessonXP += xpGain;
+    document.getElementById('lesson-xp-display').textContent = state.lessonXP;
+  }
+}
+
+// ── Word-bank / sentence-build interactions ──────────────
+let wbTrayWords = []; // { word, chipId } for sentence-build
+let matchState = null; // { pairs, matchedCount, selectedLeft, selectedRight, total }
+
+function matchSelect(el) {
+  if (!matchState || el.classList.contains('matched') || el.classList.contains('disabled')) return;
+  const side = el.dataset.side;
+  const pairIdx = el.dataset.pair;
+
+  if (side === 'left') {
+    // Deselect previous left selection
+    document.querySelectorAll('.match-item[data-side="left"].selected').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    matchState.selectedLeft = { el, pairIdx };
+  } else {
+    document.querySelectorAll('.match-item[data-side="right"].selected').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    matchState.selectedRight = { el, pairIdx };
+  }
+
+  if (matchState.selectedLeft && matchState.selectedRight) {
+    const { el: leftEl, pairIdx: leftIdx } = matchState.selectedLeft;
+    const { el: rightEl, pairIdx: rightIdx } = matchState.selectedRight;
+    if (leftIdx === rightIdx) {
+      // Correct match
+      leftEl.classList.remove('selected');
+      rightEl.classList.remove('selected');
+      leftEl.classList.add('matched');
+      rightEl.classList.add('matched');
+      matchState.matchedCount++;
+      const progressEl = document.getElementById('match-progress');
+      if (progressEl) progressEl.textContent = `${matchState.matchedCount} / ${matchState.total} matched`;
+      matchState.selectedLeft = null;
+      matchState.selectedRight = null;
+      if (matchState.matchedCount >= matchState.total) {
+        // Whole matching activity complete
+        state.lessonAnswered = true;
+        showFeedback(true, '');
+        document.getElementById('fb-title').textContent = 'All matched!';
+        document.getElementById('fb-sub').textContent = 'Great work matching every pair.';
+      }
+    } else {
+      // Wrong match — flash red, then reset both
+      leftEl.classList.add('wrong-flash');
+      rightEl.classList.add('wrong-flash');
+      setTimeout(() => {
+        leftEl.classList.remove('selected','wrong-flash');
+        rightEl.classList.remove('selected','wrong-flash');
+      }, 450);
+      matchState.selectedLeft = null;
+      matchState.selectedRight = null;
+    }
+  }
+}
+
+function selectWordChip(selected, correct, btn) {
+  // Single-word tile selection (word-bank type)
+  if (state.lessonAnswered) return;
+  state.lessonAnswered = true;
+  document.querySelectorAll('.wb-chip').forEach(b => b.disabled = true);
+  const isCorrect = selected === correct;
+  btn.style.borderColor = isCorrect ? 'var(--green)' : 'var(--red)';
+  btn.style.background = isCorrect ? 'var(--green-dim)' : 'rgba(229,62,62,0.12)';
+  if (!isCorrect) {
+    btn.classList.add('shake');
+    // Highlight correct
+    document.querySelectorAll('.wb-chip').forEach(b => {
+      if (b.textContent.trim() === correct) {
+        b.style.borderColor = 'var(--green)';
+        b.style.background = 'var(--green-dim)';
+      }
+    });
+    loseHeart();
+  }
+  const q = state.lessonQuestions[state.lessonQIndex];
+  showFeedback(isCorrect, correct);
+}
+
+function addWordToTray(btn) {
+  if (state.lessonAnswered) return;
+  const word = btn.dataset.word;
+  const chipId = btn.id;
+  // Add to tray
+  wbTrayWords.push({ word, chipId });
+  btn.classList.add('used');
+  renderTray();
+}
+
+function removeWordFromTray(idx) {
+  if (state.lessonAnswered) return;
+  const { chipId } = wbTrayWords[idx];
+  wbTrayWords.splice(idx, 1);
+  const sourceBtn = document.getElementById(chipId);
+  if (sourceBtn) sourceBtn.classList.remove('used');
+  renderTray();
+}
+
+function renderTray() {
+  const tray = document.getElementById('wb-tray');
+  const placeholder = document.getElementById('wb-placeholder');
+  if (!tray) return;
+  // Remove existing tray chips (keep placeholder)
+  tray.querySelectorAll('.wb-chip').forEach(c => c.remove());
+  if (wbTrayWords.length === 0) {
+    if (placeholder) placeholder.style.display = 'block';
+    return;
+  }
+  if (placeholder) placeholder.style.display = 'none';
+  wbTrayWords.forEach((item, i) => {
+    const chip = document.createElement('button');
+    chip.className = 'wb-chip in-tray';
+    chip.textContent = item.word;
+    chip.onclick = () => removeWordFromTray(i);
+    tray.appendChild(chip);
+  });
+}
+
+function checkSentence() {
+  if (state.lessonAnswered) return;
+  const q = state.lessonQuestions[state.lessonQIndex];
+  if (wbTrayWords.length === 0) return;
+  const userAnswer = wbTrayWords.map(w => w.word);
+  const isCorrect = JSON.stringify(userAnswer) === JSON.stringify(q.answer);
+  state.lessonAnswered = true;
+
+  const tray = document.getElementById('wb-tray');
+  if (tray) {
+    tray.classList.add(isCorrect ? 'correct-tray' : 'wrong-tray');
+  }
+  // Disable all bank chips
+  document.querySelectorAll('.wb-chip').forEach(b => b.disabled = true);
+
+  if (!isCorrect) {
+    loseHeart();
+    // Show correct answer briefly in feedback
+    const correctStr = q.answer.join(' ');
+    showFeedback(false, correctStr);
+  } else {
+    showFeedback(true, q.answer.join(''));
+  }
+}
+
+function nextQuestion() {
+  state.lessonQIndex++;
+  state.lessonAnswered = false;
+  wbTrayWords = [];
+  matchState = null;
+  document.getElementById('feedback-bar').classList.remove('show', 'correct-fb', 'wrong-fb');
+  const tabletOverlay = document.getElementById('tablet-overlay');
+  tabletOverlay.classList.remove('visible');
+  renderQuestion();
+}
+
+function loseHeart() {
+  if (state.hearts > 0) {
+    state.hearts--;
+    renderHearts();
+  }
+}
+function renderHearts() {
+  for (let i=1;i<=3;i++) {
+    const h = document.getElementById('h'+i);
+    if (h) h.classList.toggle('lost', i > state.hearts);
+  }
+}
+
+function finishLesson() {
+  const tabletOverlay = document.getElementById('tablet-overlay');
+  tabletOverlay.classList.remove('visible');
+  const lessonScreen = document.getElementById('lesson-screen');
+  lessonScreen.classList.remove('active');
+  // Hide feedback bar so it doesn't float over lesson-complete screen
+  const fb = document.getElementById('feedback-bar');
+  fb.classList.remove('show', 'correct-fb', 'wrong-fb');
+
+  // ── Persist progress ──
+  const lessonId = state.currentLesson?.id;
+  const courseId = state.currentLesson?.courseId;
+
+  // Mark lesson completed
+  if (lessonId) state.completedLessons[lessonId] = true;
+
+  // Add XP and compute level (1000 XP per level)
+  state.xp += state.lessonXP;
+  state.level = Math.floor(state.xp / 1000) + 1;
+
+  // Update course progress based on completed lessons
+  if (courseId) {
+    const course = COURSES.find(c => c.id === courseId);
+    if (course && course.lessons_data) {
+      const total = course.lessons_data.length;
+      const done = course.lessons_data.filter(l => state.completedLessons[l.id]).length;
+      state.courseProgress[courseId] = Math.round((done / total) * 100);
+      course.progress = state.courseProgress[courseId];
+      // Unlock next lesson
+      const justDoneIdx = course.lessons_data.findIndex(l => l.id === lessonId);
+      if (justDoneIdx >= 0) {
+        course.lessons_data[justDoneIdx].status = 'completed';
+        const next = course.lessons_data[justDoneIdx + 1];
+        if (next && next.status === 'locked') next.status = 'current';
+      }
+    }
+  }
+
+  // Track vocab learned from this lesson
+  const qs = state.lessonQuestions;
+  qs.forEach(q => {
+    if ((q.type === 'vocab-mcq' || q.type === 'vocab-type') && q.jp) {
+      state.learnedVocab[q.jp] = true;
+      const v = VOCAB.find(x => x.jp === q.jp);
+      if (v) v.learned = true;
+    }
+  });
+
+  // Update accuracy
+  const correct = state.lessonXP / 10;
+  state.accuracy.correct += correct;
+  state.accuracy.total += qs.length;
+
+  // Track study time
+  if (state.lessonStartTime) {
+    const mins = Math.round((Date.now() - state.lessonStartTime) / 60000);
+    state.totalStudyMinutes += mins;
+  }
+
+  // Update streak
+  checkAndUpdateStreak();
+
+  // Save everything
+  writeSave();
+  updateXPBar();
+  updateDashboardStats();
+
+  showScreen('lesson-complete');
+  document.getElementById('result-content').innerHTML = `
+    <div class="result-icon">${state.hearts > 0 ? '🎉' : '💪'}</div>
+    <div class="result-title">${state.hearts > 0 ? 'Lesson complete!' : 'Keep practicing!'}</div>
+    <div class="result-sub">Great work. You earned ${state.lessonXP} XP this lesson.</div>
+    <div class="result-stats">
+      <div class="r-stat"><div class="r-val" style="color:var(--accent)">${state.lessonXP}</div><div class="r-label">XP earned</div></div>
+      <div class="r-stat"><div class="r-val" style="color:var(--green)">${state.hearts}</div><div class="r-label">Hearts left</div></div>
+      <div class="r-stat"><div class="r-val">${qs.length}</div><div class="r-label">Questions</div></div>
+    </div>
+    <div style="margin-bottom:8px;font-size:13px;color:var(--text2)">Total XP: ${state.xp}</div>
+    <div class="result-xp-bar"><div class="result-xp-fill" id="rxpf" style="width:0%"></div></div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:28px">Level ${state.level} · Streak: ${state.streak} days 🔥</div>
+    <div style="display:flex;gap:12px;justify-content:center">
+      <button class="btn" onclick="showScreen('courses')">Back to courses</button>
+      <button class="btn primary" onclick="showScreen('dashboard')">Continue</button>
+    </div>
+  `;
+  setTimeout(()=>{ const el=document.getElementById('rxpf'); if(el)el.style.width=((state.xp%1000)/10)+'%'; }, 200);
+}
+
+function exitLesson() {
+  showModal('Exit lesson?', 'Your progress in this lesson will be lost.', ()=>{
+    document.getElementById('lesson-screen').classList.remove('active');
+    document.getElementById('tablet-overlay').classList.remove('visible');
+    if (state.currentCourse) showScreen('lesson-list');
+    else showScreen('courses');
+  });
+}
+
+function updateXPBar() {
+  const xpInLevel = state.xp % 1000;
+  document.getElementById('xp-fill').style.width = (xpInLevel/10)+'%';
+  document.getElementById('xp-label').textContent = `${xpInLevel}/1000`;
+  document.getElementById('xp-level-badge').textContent = state.level;
+}
+
+function updateDashboardStats() {
+  // Update streak badge
+  const heroStreak = document.querySelector('.streak-num');
+  if (heroStreak) heroStreak.textContent = state.streak;
+  // Update stat cards
+  const statVals = document.querySelectorAll('.stat-card .s-val');
+  if (statVals[0]) statVals[0].textContent = Object.keys(state.learnedVocab).length;
+  if (statVals[1]) {
+    const h = Math.floor(state.totalStudyMinutes / 60);
+    const m = state.totalStudyMinutes % 60;
+    statVals[1].textContent = h > 0 ? `${h}.${Math.floor(m/6)}h` : `${m}m`;
+  }
+  if (statVals[2]) {
+    const acc = state.accuracy.total > 0
+      ? Math.round((state.accuracy.correct / state.accuracy.total) * 100) : 0;
+    statVals[2].textContent = acc + '%';
+  }
+  if (statVals[3]) statVals[3].textContent = state.xp;
+  // Update review count
+  const reviewDue = VOCAB.filter(v => !v.learned).length;
+  const badge = document.getElementById('review-count');
+  if (badge) badge.textContent = reviewDue;
+}
+
+// ════════════════════════════════════════════════
+// DRAWING TABLET
+// ════════════════════════════════════════════════
+function initCanvas() {
+  const canvas = document.getElementById('draw-canvas');
+  if (!canvas) return;
+  canvasCtx = canvas.getContext('2d');
+  canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+  drawStrokes = [];
+  currentStroke = [];
+  canvasCtx.strokeStyle = '#1a1a1a';
+  canvasCtx.lineWidth = state.brushSize;
+  canvasCtx.lineCap = 'round';
+  canvasCtx.lineJoin = 'round';
+
+  canvas.onmousedown = e => { drawing=true; currentStroke=[getPos(e,canvas)]; };
+  canvas.onmousemove = e => { if(!drawing)return; const p=getPos(e,canvas); currentStroke.push(p); drawLast(); };
+  canvas.onmouseup = e => { if(drawing){drawing=false;drawStrokes.push([...currentStroke]);currentStroke=[];} };
+  canvas.onmouseleave = e => { if(drawing){drawing=false;drawStrokes.push([...currentStroke]);currentStroke=[];} };
+  canvas.ontouchstart = e => { e.preventDefault(); drawing=true; currentStroke=[getPos(e.touches[0],canvas)]; };
+  canvas.ontouchmove = e => { e.preventDefault(); if(!drawing)return; const p=getPos(e.touches[0],canvas); currentStroke.push(p); drawLast(); };
+  canvas.ontouchend = e => { if(drawing){drawing=false;drawStrokes.push([...currentStroke]);currentStroke=[];} };
+}
+
+function getPos(e, canvas) {
+  const r = canvas.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+function drawLast() {
+  if (!canvasCtx || currentStroke.length < 2) return;
+  const pts = currentStroke;
+  canvasCtx.beginPath();
+  canvasCtx.moveTo(pts[pts.length-2].x, pts[pts.length-2].y);
+  canvasCtx.lineTo(pts[pts.length-1].x, pts[pts.length-1].y);
+  canvasCtx.stroke();
+}
+
+function clearCanvas() {
+  const canvas = document.getElementById('draw-canvas');
+  if (!canvas || !canvasCtx) return;
+  canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+  drawStrokes = [];
+  currentStroke = [];
+  document.getElementById('tablet-result').innerHTML = '';
+}
+
+function undoStroke() {
+  if (!canvasCtx || drawStrokes.length === 0) return;
+  drawStrokes.pop();
+  const canvas = document.getElementById('draw-canvas');
+  canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+  drawStrokes.forEach(stroke => {
+    canvasCtx.beginPath();
+    stroke.forEach((p, i) => { if(i===0) canvasCtx.moveTo(p.x,p.y); else canvasCtx.lineTo(p.x,p.y); });
+    canvasCtx.stroke();
+  });
+}
+
+function submitDrawing() {
+  const canvas = document.getElementById('draw-canvas');
+  if (!canvas || drawStrokes.length === 0) {
+    document.getElementById('tablet-result').innerHTML = '<span style="color:var(--text3)">Draw the character first</span>';
+    return;
+  }
+  // Stroke count heuristic similarity check
+  const q = state.lessonQuestions[state.lessonQIndex];
+  const coverage = getDrawingCoverage(canvas);
+  const score = coverage > 15 ? Math.min(100, Math.round(coverage * 2.5)) : 20;
+  const good = score >= 55;
+  const resultEl = document.getElementById('tablet-result');
+  resultEl.innerHTML = `
+    <span>Match score: </span>
+    <span class="tr-match ${good?'good':'poor'}">${score}%</span>
+    <span style="margin-left:8px;font-size:12px;color:var(--text3)">${good?'Good stroke!':'Try again'}</span>
+  `;
+  if (good) {
+    state.lessonAnswered = true;
+    showFeedback(true, q.char||q.jp||'');
+  }
+}
+
+function getDrawingCoverage(canvas) {
+  const ctx = canvas.getContext('2d');
+  const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  let filled = 0;
+  for (let i = 3; i < data.length; i += 4) { if (data[i] > 50) filled++; }
+  return Math.round((filled / (canvas.width * canvas.height)) * 100 * 12);
+}
+
+// ════════════════════════════════════════════════
+// TABLET MODE TOGGLE
+// ════════════════════════════════════════════════
+function toggleTabletMode() {
+  state.tabletEnabled = !state.tabletEnabled;
+  writeSave();
+  const btn = document.getElementById('tablet-toggle-btn');
+  const modeDisp = document.getElementById('tablet-mode-display');
+  const advBtn = document.getElementById('tablet-adv-btn');
+  if (state.tabletEnabled) {
+    btn.classList.add('active');
+    btn.setAttribute('data-tip', 'Drawing tablet: on');
+    modeDisp.style.display = 'block';
+    advBtn.style.display = 'flex';
+    updateTabletModeText();
+  } else {
+    btn.classList.remove('active');
+    btn.setAttribute('data-tip', 'Drawing tablet: off');
+    modeDisp.style.display = 'none';
+    advBtn.style.display = 'none';
+    document.getElementById('tablet-overlay').classList.remove('visible');
+  }
+  const settingsToggle = document.getElementById('settings-tablet-toggle');
+  if (settingsToggle) settingsToggle.className = 'toggle-switch ' + (state.tabletEnabled ? 'on' : '');
+}
+
+function toggleTabletAdvanced() {
+  state.tabletAdvanced = !state.tabletAdvanced;
+  writeSave();
+  const btn = document.getElementById('tablet-adv-btn');
+  btn.style.background = state.tabletAdvanced ? 'var(--accent-dim)' : '';
+  btn.style.borderColor = state.tabletAdvanced ? 'var(--accent-border)' : '';
+  updateTabletModeText();
+  document.getElementById('mode-simple-btn').classList.toggle('active', !state.tabletAdvanced);
+  document.getElementById('mode-adv-btn').classList.toggle('active', state.tabletAdvanced);
+}
+
+function updateTabletModeText() {
+  document.getElementById('tablet-mode-text').textContent = state.tabletAdvanced ? 'Advanced' : 'Simple';
+}
+
+function toggleTabletSetting(el) {
+  el.classList.toggle('on');
+  state.tabletEnabled = el.classList.contains('on');
+  document.getElementById('tablet-toggle-btn').classList.toggle('active', state.tabletEnabled);
+}
+
+function setTabletModeBtn(mode) {
+  state.tabletAdvanced = mode === 'advanced';
+  document.getElementById('mode-simple-btn').classList.toggle('active', !state.tabletAdvanced);
+  document.getElementById('mode-adv-btn').classList.toggle('active', state.tabletAdvanced);
+  updateTabletModeText();
+}
+
+function setBrushSize(val) {
+  state.brushSize = parseInt(val);
+  if (canvasCtx) canvasCtx.lineWidth = state.brushSize;
+  writeSave();
+}
+
+// ════════════════════════════════════════════════
+// FLASHCARDS
+// ════════════════════════════════════════════════
+const FC_SETS = [
+  { id:'n5-greetings', title:'N5 Greetings', count:7, level:'N5' },
+  { id:'n5-numbers', title:'N5 Numbers', count:10, level:'N5' },
+  { id:'n5-hiragana', title:'Hiragana A–O', count:5, level:'N5' },
+  { id:'n5-vocab', title:'N5 Core Words', count:25, level:'N5' },
+];
+function renderFCSets() {
+  document.getElementById('fc-sets').innerHTML = FC_SETS.map(s=>`
+    <div class="course-card level-n5" onclick="startFlashcards('${s.id}')">
+      <div class="c-level">${s.level}</div>
+      <div class="c-title">${s.title}</div>
+      <div class="c-sub">${s.count} cards</div>
+    </div>
+  `).join('');
+}
+function startFlashcards(setId) {
+  const vocab = VOCAB.slice(0,10);
+  state.fcSession = shuffle([...vocab]);
+  state.fcIndex = 0;
+  state.fcFlipped = false;
+  document.getElementById('fc-setup').style.display = 'none';
+  document.getElementById('fc-session').style.display = 'block';
+  renderFC();
+}
+function renderFC() {
+  const cards = state.fcSession;
+  const idx = state.fcIndex;
+  const total = cards.length;
+  document.getElementById('fc-progress').style.width = Math.round((idx/total)*100)+'%';
+  document.getElementById('fc-counter').textContent = `${idx+1}/${total}`;
+  const card = cards[idx];
+  document.getElementById('fc-front').textContent = card.jp;
+  document.getElementById('fc-back').style.display = 'none';
+  document.getElementById('fc-back').textContent = `${card.read} — ${card.en}`;
+  document.getElementById('fc-hint').textContent = 'Click to reveal';
+  state.fcFlipped = false;
+  const actions = document.getElementById('fc-actions');
+  if (actions) actions.style.display = 'none';
+}
+function flipCard() {
+  if (!state.fcFlipped) {
+    state.fcFlipped = true;
+    document.getElementById('fc-back').style.display = 'block';
+    document.getElementById('fc-hint').textContent = 'How well did you know this?';
+    const actions = document.getElementById('fc-actions');
+    if (actions) actions.style.display = 'block';
+  }
+}
+function rateCard(r) {
+  state.fcIndex++;
+  if (state.fcIndex >= state.fcSession.length) {
+    endFlashcards(true);
+  } else {
+    renderFC();
+  }
+}
+function endFlashcards(finished=false) {
+  document.getElementById('fc-setup').style.display = 'block';
+  document.getElementById('fc-session').style.display = 'none';
+  renderFCSets();
+}
+
+// ════════════════════════════════════════════════
+// REVIEW
+// ════════════════════════════════════════════════
+function renderReview() {
+  const due = VOCAB.filter(v=>!v.learned).slice(0,12);
+  document.getElementById('review-list').innerHTML = due.map(v=>`
+    <div class="lesson-row">
+      <div class="lesson-num" style="font-family:'Noto Sans JP',sans-serif;font-size:16px">${v.jp}</div>
+      <div class="lesson-info">
+        <div class="l-title">${v.jp} — ${v.en}</div>
+        <div class="l-sub">${v.read}</div>
+      </div>
+      <div class="lesson-meta"><span class="lesson-tag">${v.level}</span></div>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════════════════
+// MODAL
+// ════════════════════════════════════════════════
+let _modalCallback = null;
+function showModal(title, body, onConfirm) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').textContent = body;
+  _modalCallback = onConfirm;
+  document.getElementById('modal-confirm-btn').onclick = ()=>{ closeModal(); if(_modalCallback) _modalCallback(); };
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+// ════════════════════════════════════════════════
+// THEME
+// ════════════════════════════════════════════════
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('theme-icon').textContent = isDark ? '🌙' : '☀️';
+  document.getElementById('theme-label').textContent = isDark ? 'Dark mode' : 'Light mode';
+  const dmToggle = document.getElementById('dark-mode-toggle');
+  if (dmToggle) dmToggle.className = 'toggle-switch ' + (isDark ? '' : 'on');
+}
+function toggleThemeFromSettings(el) {
+  el.classList.toggle('on');
+  const isLight = !el.classList.contains('on');
+  document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+  document.getElementById('theme-icon').textContent = isLight ? '🌙' : '☀️';
+  document.getElementById('theme-label').textContent = isLight ? 'Dark mode' : 'Light mode';
+}
+function toggleFurigana(el) {
+  el.classList.toggle('on');
+  state.showFurigana = el.classList.contains('on');
+  writeSave();
+}
+
+function toggleKeyboardless(el) {
+  el.classList.toggle('on');
+  state.keyboardless = el.classList.contains('on');
+  writeSave();
+}
+
+function resetProgress() {
+  showModal(
+    'Reset all progress?',
+    'This will permanently delete your XP, streak, completed lessons, and learned words. This cannot be undone.',
+    () => {
+      localStorage.removeItem(SAVE_KEY);
+      location.reload();
+    }
+  );
+}
+
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
+function init() {
+  // Restore saved lesson statuses into COURSES data
+  COURSES.forEach(course => {
+    if (!course.lessons_data) return;
+    const savedProg = state.courseProgress[course.id];
+    if (savedProg !== undefined) course.progress = savedProg;
+    let lastCompletedIdx = -1;
+    course.lessons_data.forEach((l, i) => {
+      if (state.completedLessons[l.id]) {
+        l.status = 'completed';
+        lastCompletedIdx = i;
+      }
+    });
+    // Unlock next lesson after last completed
+    const nextIdx = lastCompletedIdx + 1;
+    if (nextIdx < course.lessons_data.length) {
+      const next = course.lessons_data[nextIdx];
+      if (next.status === 'locked') next.status = 'current';
+    }
+  });
+
+  // Restore learned vocab
+  VOCAB.forEach(v => { if (state.learnedVocab[v.jp]) v.learned = true; });
+
+  // Restore theme
+  document.documentElement.setAttribute('data-theme', state.theme || 'dark');
+  const isDark = state.theme !== 'light';
+  document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
+  document.getElementById('theme-label').textContent = isDark ? 'Light mode' : 'Dark mode';
+  const dmToggle = document.getElementById('dark-mode-toggle');
+  if (dmToggle) dmToggle.className = 'toggle-switch ' + (isDark ? 'on' : '');
+
+  // Restore tablet settings
+  if (state.tabletEnabled) {
+    document.getElementById('tablet-toggle-btn').classList.add('active');
+    document.getElementById('tablet-mode-display').style.display = 'block';
+    document.getElementById('tablet-adv-btn').style.display = 'flex';
+    updateTabletModeText();
+  }
+  if (state.tabletAdvanced) {
+    document.getElementById('mode-adv-btn')?.classList.add('active');
+    document.getElementById('mode-simple-btn')?.classList.remove('active');
+  }
+  const brushRange = document.getElementById('brush-size-range');
+  if (brushRange) brushRange.value = state.brushSize;
+
+  // Restore keyboardless setting
+  const kbToggle = document.getElementById('keyboardless-toggle');
+  if (kbToggle) kbToggle.className = 'toggle-switch ' + (state.keyboardless ? 'on' : '');
+
+  // Patch theme functions to also save
+  const origToggleTheme = toggleTheme;
+  window.toggleTheme = function() {
+    origToggleTheme();
+    state.theme = document.documentElement.getAttribute('data-theme');
+    writeSave();
+  };
+
+  renderDashboard();
+  renderCourses();
+  renderVocab();
+  renderKana('hiragana');
+  renderFCSets();
+  renderReview();
+  updateXPBar();
+  updateDashboardStats();
+}
+init();
+authRestoreSession();
+</script>
+</body>
+</html>
